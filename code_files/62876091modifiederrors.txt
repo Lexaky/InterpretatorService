@@ -1,0 +1,6 @@
+(10,50): error CS0841: Cannot use local variable 'arr' before it is declared
+(10,67): error CS0841: Cannot use local variable 'matrix' before it is declared
+(10,42): error CS1503: Argument 2: cannot convert from '(string, var)' to '(string Name, object Value)'
+(10,56): error CS1503: Argument 3: cannot convert from '(string, var)' to '(string Name, object Value)'
+(12,67): error CS0841: Cannot use local variable 'matrix' before it is declared
+(12,56): error CS1503: Argument 3: cannot convert from '(string, var)' to '(string Name, object Value)'

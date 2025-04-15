@@ -1,0 +1,1 @@
+(41,132): error CS1061: '(string Name, object Value)[]' does not contain a definition for 'Select' and no accessible extension method 'Select' accepting a first argument of type '(string Name, object Value)[]' could be found (are you missing a using directive or an assembly reference?)

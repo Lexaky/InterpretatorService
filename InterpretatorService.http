@@ -1,0 +1,6 @@
+@InterpretatorService_HostAddress = http://localhost:5216
+
+GET {{InterpretatorService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
