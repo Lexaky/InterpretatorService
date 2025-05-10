@@ -2,6 +2,8 @@ using InterpretatorService.Interfaces;
 using InterpretatorService.Services;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.EntityFrameworkCore;
+using InterpretatorService.Data;
 
 namespace InterpretatorService
 {
@@ -11,15 +13,11 @@ namespace InterpretatorService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Настройка Kestrel для HTTP
-            builder.WebHost.ConfigureKestrel(serverOptions =>
-            {
-                serverOptions.ListenAnyIP(80);
-            });
-
             // Регистрация сервисов
             builder.Services.AddControllers();
             builder.Services.AddScoped<IInterpreterService, InterpreterService>();
+            builder.Services.AddDbContext<TestsDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("TestsDb")));
 
             // Настройка Swagger
             builder.Services.AddEndpointsApiExplorer();
@@ -37,10 +35,10 @@ namespace InterpretatorService
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "InterpretatorService API v1"));
             }
-
+            //app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
-
+            app.MapGet("/hello", () => "Hello World!");
             app.Run();
         }
 

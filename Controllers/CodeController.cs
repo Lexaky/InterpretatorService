@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using InterpretatorService.Services;
+using Microsoft.EntityFrameworkCore;
+using InterpretatorService.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace InterpretatorService.Controllers
 {
@@ -20,11 +23,13 @@ namespace InterpretatorService.Controllers
     public class CodeController : ControllerBase
     {
         private readonly IInterpreterService _interpreterService;
+        private readonly TestsDbContext _dbContext;
         private const string StorageDirectory = "/app/code_files";
 
-        public CodeController(IInterpreterService interpreterService)
+        public CodeController(IInterpreterService interpreterService, TestsDbContext dbContext)
         {
             _interpreterService = interpreterService;
+            _dbContext = dbContext;
 
             if (!Directory.Exists(StorageDirectory))
             {
@@ -39,7 +44,6 @@ namespace InterpretatorService.Controllers
         {
             var codeFile = request.CodeFile;
             var metaFile = request.MetaFile;
-            var algorithmId = request.AlgorithmId;
 
             if (codeFile == null || codeFile.Length == 0 || Path.GetExtension(codeFile.FileName).ToLower() != ".cs")
             {
@@ -52,107 +56,94 @@ namespace InterpretatorService.Controllers
 
             try
             {
-                // Используем AlgorithmId как codeId
-                int codeId = algorithmId;
+                // Проверяем и создаём директорию StorageDirectory
+                if (!Directory.Exists(StorageDirectory))
+                {
+                    Console.WriteLine($"Creating directory {StorageDirectory}...");
+                    Directory.CreateDirectory(StorageDirectory);
+                }
+
+                Console.WriteLine("Attempting to connect to PostgreSQL...");
+                int codeId;
+                using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+                {
+                    Console.WriteLine("Creating new Algorithm entry...");
+                    var newAlgorithm = new Algorithm { AlgoPath = "" };
+                    _dbContext.Algorithms.Add(newAlgorithm);
+                    Console.WriteLine("Saving changes to Algorithms...");
+                    await _dbContext.SaveChangesAsync();
+                    codeId = newAlgorithm.AlgoId;
+                    Console.WriteLine($"Generated AlgoId: {codeId}");
+                    await transaction.CommitAsync();
+                }
+
                 string codeFilePath = Path.Combine(StorageDirectory, $"{codeId}.cs");
                 string metaFilePath = Path.Combine(StorageDirectory, $"{codeId}init.txt");
-                string errorsPath = Path.Combine(StorageDirectory, $"{codeId}errors.txt");
-                string warningsPath = Path.Combine(StorageDirectory, $"{codeId}warnings.txt");
-                string outputPath = Path.Combine(StorageDirectory, $"{codeId}output.txt");
 
-                // Проверяю, не существует ли уже файл
                 if (System.IO.File.Exists(codeFilePath))
                 {
                     return BadRequest($"Algorithm with ID {codeId} already exists.");
                 }
 
+                // Сохраняем файл .cs
                 Console.WriteLine($"Saving code file to {codeFilePath}");
-                // Сохраняю исходный код
-                using (var stream = new System.IO.FileStream(codeFilePath, FileMode.Create))
+                using (var stream = new FileStream(codeFilePath, FileMode.Create))
                 {
                     await codeFile.CopyToAsync(stream);
+                    await stream.FlushAsync(); // Гарантируем запись на диск
+                    Console.WriteLine($"Code file {codeFilePath} saved successfully.");
                 }
 
+                // Сохраняем метаданные
                 Console.WriteLine($"Saving meta file to {metaFilePath}");
-                // Сохраняю метафайл
-                using (var stream = new System.IO.FileStream(metaFilePath, FileMode.Create))
+                using (var stream = new FileStream(metaFilePath, FileMode.Create))
                 {
                     await metaFile.CopyToAsync(stream);
+                    await stream.FlushAsync(); // Гарантируем запись на диск
+                    Console.WriteLine($"Meta file {metaFilePath} saved successfully.");
                 }
 
-                // Читаю метаинформацию
-                string[] metaLines;
-                using (var stream = new StreamReader(metaFile.OpenReadStream()))
-                {
-                    metaLines = (await stream.ReadToEndAsync()).Split('\n', StringSplitOptions.RemoveEmptyEntries);
-                }
-
-                // Парсинг метафайла
-                var trackLines = new List<(int LineNumber, string[] VariableNames)>();
-                foreach (var line in metaLines)
-                {
-                    var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length < 1 || !int.TryParse(parts[0], out int lineNumber))
-                    {
-                        Console.WriteLine($"Skipping invalid meta line: {line}");
-                        continue;
-                    }
-                    var variableNames = parts.Skip(1).Select(v => v.Trim()).ToArray();
-                    trackLines.Add((LineNumber: lineNumber, VariableNames: variableNames));
-                }
-
-                // Компиляция и выполнение исходного кода
-                var stopwatch = Stopwatch.StartNew();
-                var codeModel = await _interpreterService.ExecuteCodeAsync(codeFilePath);
-                stopwatch.Stop();
-
-                // Логирование результата выполнения
-                Console.WriteLine($"ExecuteCodeAsync result: CodeId={codeModel.CodeId}, IsSuccessful={codeModel.IsSuccessful}, ErrorOutput={codeModel.ErrorOutput}, StandardOutput={codeModel.StandardOutput}");
-
-                // Записываем результаты
-                await System.IO.File.WriteAllTextAsync(errorsPath, codeModel.ErrorOutput ?? "");
-                await System.IO.File.WriteAllTextAsync(warningsPath, codeModel.WarningOutput ?? "");
-                await System.IO.File.WriteAllTextAsync(outputPath, codeModel.StandardOutput ?? "");
-
-                // Проверяю успешность
-                if (!codeModel.IsSuccessful || !string.IsNullOrEmpty(codeModel.ErrorOutput))
-                {
-                    return StatusCode(500, new CodeResponseDto
-                    {
-                        Output = codeModel.StandardOutput ?? "",
-                        Error = codeModel.ErrorOutput ?? "Unknown error occurred during code execution",
-                        ExecutionTime = stopwatch.ElapsedMilliseconds,
-                        IsSuccessful = false
-                    });
-                }
-
-                // Устанавливаем делегат для TrackVariables
-                VariableTracker.TrackDelegate = (filePath, variables) =>
-                {
-                    var tracker = new VariableTracker();
-                    tracker.TrackVariables($"{StorageDirectory}/{filePath}values.txt", variables).GetAwaiter().GetResult();
-                };
+                // Обновляем AlgoPath
+                Console.WriteLine($"Updating AlgoPath for AlgoId: {codeId}");
+                var algorithm = await _dbContext.Algorithms.FindAsync(codeId);
+                algorithm.AlgoPath = codeFilePath;
+                await _dbContext.SaveChangesAsync();
+                Console.WriteLine($"AlgoPath updated to {codeFilePath}");
 
                 return Ok(new { CodeId = codeId });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"UploadCodeFile exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
+                var errorMessage = ex.Message;
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    errorMessage += $"\nInner Exception: {ex.Message}";
+                }
+                Console.WriteLine($"UploadCodeFile exception: {errorMessage}\nStackTrace: {ex.StackTrace}");
                 return StatusCode(500, new CodeResponseDto
                 {
                     Output = "",
-                    Error = $"Server error: {ex.Message}",
+                    Error = $"Server error: {errorMessage}",
                     ExecutionTime = 0,
                     IsSuccessful = false
                 });
             }
         }
+
         [HttpPost("modify/{codeId}")]
         public async Task<IActionResult> ModifyCode(int codeId)
         {
             string codeFilePath = Path.Combine(StorageDirectory, $"{codeId}.cs");
             string metaFilePath = Path.Combine(StorageDirectory, $"{codeId}init.txt");
             string modifiedFilePath = Path.Combine(StorageDirectory, $"{codeId}modified.cs");
+            string errorsPath = Path.Combine(StorageDirectory, $"{codeId}errors.txt");
+            string warningsPath = Path.Combine(StorageDirectory, $"{codeId}warnings.txt");
+            string outputPath = Path.Combine(StorageDirectory, $"{codeId}output.txt");
+            string valuesFilePath = Path.Combine(StorageDirectory, $"{codeId}values.txt");
+            string modifiedErrorsPath = Path.Combine(StorageDirectory, $"{codeId}modifiederrors.txt");
+            string modifiedOutputPath = Path.Combine(StorageDirectory, $"{codeId}modifiedoutput.txt");
+            string modifiedWarningsPath = Path.Combine(StorageDirectory, $"{codeId}modifiedwarnings.txt");
 
             if (!System.IO.File.Exists(codeFilePath))
             {
@@ -165,10 +156,24 @@ namespace InterpretatorService.Controllers
 
             try
             {
-                // Читаем исходный код
+                var filesToDelete = new[]
+                {
+                    modifiedFilePath, errorsPath, warningsPath, outputPath, valuesFilePath,
+                    modifiedErrorsPath, modifiedOutputPath, modifiedWarningsPath
+                };
+                foreach (var file in filesToDelete)
+                {
+                    if (System.IO.File.Exists(file))
+                    {
+                        Console.WriteLine($"Deleting existing file: {file}");
+                        System.IO.File.Delete(file);
+                    }
+                }
+
+                Console.WriteLine($"Reading code file: {codeFilePath}");
                 string code = await System.IO.File.ReadAllTextAsync(codeFilePath);
 
-                // Читаем метаинформацию
+                Console.WriteLine($"Reading meta file: {metaFilePath}");
                 var metaLines = await System.IO.File.ReadAllLinesAsync(metaFilePath);
                 var trackLines = new List<(int LineNumber, string[] VariableNames)>();
                 foreach (var line in metaLines)
@@ -183,16 +188,103 @@ namespace InterpretatorService.Controllers
                     trackLines.Add((LineNumber: lineNumber, VariableNames: variableNames));
                 }
 
-                // Модифицируем код
+                Console.WriteLine($"Modifying code for AlgoId: {codeId}");
                 string modifiedCode = ModifyCode(code, trackLines, codeId);
+                Console.WriteLine($"Writing modified code to: {modifiedFilePath}");
                 await System.IO.File.WriteAllTextAsync(modifiedFilePath, modifiedCode);
+
+                Console.WriteLine($"Removing existing AlgoSteps for AlgoId: {codeId}");
+                var oldSteps = _dbContext.AlgoSteps.Where(s => s.AlgoId == codeId);
+                _dbContext.AlgoSteps.RemoveRange(oldSteps);
+                await _dbContext.SaveChangesAsync();
+                Console.WriteLine("Existing AlgoSteps removed successfully.");
+
+                Console.WriteLine($"Executing modified code: {modifiedFilePath}");
+                var stopwatch = Stopwatch.StartNew();
+                var codeModel = await _interpreterService.ExecuteCodeAsync(modifiedFilePath);
+                stopwatch.Stop();
+
+                Console.WriteLine($"ExecuteCodeAsync result: CodeId={codeModel.CodeId}, IsSuccessful={codeModel.IsSuccessful}, ErrorOutput={codeModel.ErrorOutput}");
+
+                Console.WriteLine($"Writing errors to: {errorsPath}");
+                await System.IO.File.WriteAllTextAsync(errorsPath, codeModel.ErrorOutput ?? "");
+                Console.WriteLine($"Writing warnings to: {warningsPath}");
+                await System.IO.File.WriteAllTextAsync(warningsPath, codeModel.WarningOutput ?? "");
+                Console.WriteLine($"Writing output to: {outputPath}");
+                await System.IO.File.WriteAllTextAsync(outputPath, codeModel.StandardOutput ?? "");
+
+                if (!codeModel.IsSuccessful || !string.IsNullOrEmpty(codeModel.ErrorOutput))
+                {
+                    return StatusCode(500, new CodeResponseDto
+                    {
+                        Output = codeModel.StandardOutput ?? "",
+                        Error = codeModel.ErrorOutput ?? "Unknown error occurred during code execution",
+                        ExecutionTime = stopwatch.ElapsedMilliseconds,
+                        IsSuccessful = false
+                    });
+                }
+
+                if (System.IO.File.Exists(valuesFilePath))
+                {
+                    Console.WriteLine($"Reading values file: {valuesFilePath}");
+                    var valueLines = await System.IO.File.ReadAllLinesAsync(valuesFilePath);
+
+                    foreach (var line in valueLines)
+                    {
+                        Console.WriteLine($"Processing value line: {line}");
+                        var parts = line.Split("//");
+                        if (parts.Length != 5)
+                        {
+                            Console.WriteLine($"Skipping invalid value line: {line}");
+                            continue;
+                        }
+
+                        if (!int.TryParse(parts[0], out int step))
+                        {
+                            Console.WriteLine($"Invalid step value in line: {line}");
+                            continue;
+                        }
+
+                        var algoStep = new AlgoStep
+                        {
+                            AlgoId = codeId,
+                            Step = step,
+                            Type = parts[2],
+                            VarName = parts[1],
+                            Value = parts[4]
+                        };
+
+                        Console.WriteLine($"Adding AlgoStep: AlgoId={algoStep.AlgoId}, Step={algoStep.Step}, VarName={algoStep.VarName}, Value={algoStep.Value}");
+                        _dbContext.AlgoSteps.Add(algoStep);
+                    }
+
+                    Console.WriteLine("Saving AlgoSteps to database...");
+                    await _dbContext.SaveChangesAsync();
+                    Console.WriteLine("AlgoSteps saved successfully.");
+                }
+                else
+                {
+                    Console.WriteLine($"Values file not found: {valuesFilePath}");
+                }
 
                 return Ok(new { CodeId = codeId });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ModifyCode exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Server error: {ex.Message}");
+                var errorMessage = ex.Message;
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    errorMessage += $"\nInner Exception: {ex.Message}";
+                }
+                Console.WriteLine($"ModifyCode exception: {errorMessage}\nStackTrace: {ex.StackTrace}");
+                return StatusCode(500, new CodeResponseDto
+                {
+                    Output = "",
+                    Error = $"Server error: {errorMessage}",
+                    ExecutionTime = 0,
+                    IsSuccessful = false
+                });
             }
         }
 
@@ -211,13 +303,11 @@ namespace InterpretatorService.Controllers
                 var codeModel = await _interpreterService.ExecuteCodeAsync(modifiedFilePath);
                 stopwatch.Stop();
 
-                // Логируем результат
                 Console.WriteLine($"ExecuteCode result: CodeId={codeModel.CodeId}, IsSuccessful={codeModel.IsSuccessful}, ErrorOutput={codeModel.ErrorOutput}");
 
-                // Обновляем файлы вывода
                 var errorsPath = Path.Combine(StorageDirectory, $"{codeId}errors.txt");
                 var warningsPath = Path.Combine(StorageDirectory, $"{codeId}warnings.txt");
-                var outputPath = Path.Combine(StorageDirectory, $"{codeId}output.txt");
+                string outputPath = Path.Combine(StorageDirectory, $"{codeId}output.txt");
 
                 await System.IO.File.WriteAllTextAsync(errorsPath, codeModel.ErrorOutput ?? "");
                 await System.IO.File.WriteAllTextAsync(warningsPath, codeModel.WarningOutput ?? "");
@@ -245,7 +335,6 @@ namespace InterpretatorService.Controllers
                 });
             }
         }
-
         [HttpGet("values/{codeId}")]
         public IActionResult GetValuesFile(int codeId)
         {

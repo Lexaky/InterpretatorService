@@ -1,2 +1,0 @@
-x arr matrix
-6 7 8
