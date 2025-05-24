@@ -1,0 +1,2 @@
+A using clause must precede all other elements defined in the namespace except extern alias declarations
+A using clause must precede all other elements defined in the namespace except extern alias declarations

@@ -1,0 +1,44 @@
+Алгоритм 19 не выполнен
+
+Список ошибок при компиляции исходного кода:
+; expected
+Syntax error, ',' expected
+The name 'i' does not exist in the current context
+The name 'i' does not exist in the current context
+The name 'i' does not exist in the current context
+The name 'i' does not exist in the current context
+
+Файл ошибок компиляции модифицированного кода не найден.
+
+Список предупреждений при компиляции исходного кода:
+The variable 'x' is assigned but its value is never used
+
+Файл предупреждений компиляции модифицированного кода не найден.
+
+Содержимое файла метаданных:
+12 x arr matrix
+14 x arr
+
+
+Содержимое исходного файла алгоритма:
+using System;
+namespace HelloWorldApp
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int x = 5;
+            int[] arr = { 1, 2 }
+            int[,] matrix = { { 1, 2 } { 3, 4 } };
+            for (i = 0; i < 10; i++)
+            {
+                Console.WriteLine(i);
+            }
+            Console.WriteLine("Step 1");
+            Console.WriteLine("Step 2");
+        }
+    }
+}
+
+Файл значений переменных не найден.

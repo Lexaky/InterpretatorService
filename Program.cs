@@ -28,6 +28,7 @@ namespace InterpretatorService
             });
 
             var app = builder.Build();
+            var lifetime = app.Lifetime;
 
             // Конфигурация middleware
             if (app.Environment.IsDevelopment())
@@ -35,10 +36,16 @@ namespace InterpretatorService
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "InterpretatorService API v1"));
             }
+
+            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+            {
+                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
+                    writer.WriteLine("Произведён выход из приложения");
+            };
+
             //app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapGet("/hello", () => "Hello World!");
             app.Run();
         }
 
@@ -46,7 +53,6 @@ namespace InterpretatorService
         {
             public void Apply(OpenApiOperation operation, OperationFilterContext context)
             {
-                // Отладочный вывод
                 Console.WriteLine($"Applying FileUploadOperationFilter to {context.MethodInfo.Name}");
 
                 // Проверяем, является ли метод UploadCodeFile
@@ -69,22 +75,17 @@ namespace InterpretatorService
                                             Type = "string",
                                             Format = "binary",
                                             Description = "C# code file (.cs)"
-                                        },
-                                        ["metaFile"] = new OpenApiSchema
-                                        {
-                                            Type = "string",
-                                            Format = "binary",
-                                            Description = "Metadata file (.txt)"
                                         }
                                     },
-                                    Required = new HashSet<string> { "codeFile", "metaFile" }
+                                    Required = new HashSet<string> { "codeFile" }
                                 }
                             }
                         },
-                        Description = "Upload code and metadata files"
+                        Description = "Upload C# code file"
                     };
                 }
             }
         }
+
     }
 }

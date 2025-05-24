@@ -1,0 +1,5 @@
+x - int
+arr - int[]
+matrix - int[,]
+i - int
+args - string[]

@@ -1,0 +1,10 @@
+Type or namespace definition, or end-of-file expected
+Top-level statements must precede namespace and type declarations.
+Type or namespace definition, or end-of-file expected
+Type or namespace definition, or end-of-file expected
+Missing partial modifier on declaration of type 'Program'; another partial declaration of this type exists
+The name 'arr' does not exist in the current context
+The name 'j' does not exist in the current context
+The name 'j' does not exist in the current context
+The name 'j' does not exist in the current context
+The name 'temp' does not exist in the current context

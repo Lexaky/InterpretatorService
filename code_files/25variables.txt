@@ -1,0 +1,6 @@
+arr - short[]
+arr - int[]
+i - int
+j - int
+sw - int
+args - string[]

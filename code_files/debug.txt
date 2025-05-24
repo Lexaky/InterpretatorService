@@ -1,0 +1,973 @@
+[05/24/2025 15:48:34][SubstituteValues] User data file content:
+12332 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/24/2025 15:48:36][SubstituteValues] Values JSON file not found: /app/code_files/46_880418_temp_values.json
+[05/24/2025 15:48:36][SubstituteValues] Mismatches JSON file not found: /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 15:48:36][SubstituteValues] Response: IsSuccessful=False, ValuesCount=0, MismatchesCount=0, Error=User step 2 is incorrect. True step: 1
+[05/24/2025 15:54:12][SubstituteValues] User data file content:
+12332 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/24/2025 15:54:12][SubstituteValues] Temporary file created: /app/code_files/temp_46_880418.cs
+[05/24/2025 15:54:12][SubstituteValues] Write permission to /app/code_files confirmed
+[05/24/2025 15:54:14][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 58
+, ErrorOutput=
+[05/24/2025 15:54:14][SubstituteValues] Values JSON file not found: /app/code_files/46_880418_temp_values.json
+[05/24/2025 15:54:14][SubstituteValues] Mismatches JSON file not found: /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 15:54:14][SubstituteValues] User steps: 1, 2, 3
+[05/24/2025 15:54:14][SubstituteValues] Max program step: 0
+[05/24/2025 15:54:14][SubstituteValues] Response: IsSuccessful=False, ValuesCount=0, MismatchesCount=0, Error=User step 2 is incorrect. True step: 1, ExecutionTime=0
+[05/24/2025 15:57:28][SubstituteValues] User data file content:
+12332 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/24/2025 15:57:28][SubstituteValues] Inserted Initialize call at line 11
+[05/24/2025 15:57:28][SubstituteValues] Temporary file created: /app/code_files/temp_46_880418.cs
+[05/24/2025 15:57:30][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 58
+, ErrorOutput=
+[05/24/2025 15:57:30][SubstituteValues] Values JSON file not found: /app/code_files/46_880418_temp_values.json
+[05/24/2025 15:57:30][SubstituteValues] Mismatches JSON file not found: /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 15:57:30][SubstituteValues] User steps: 1, 2, 3
+[05/24/2025 15:57:30][SubstituteValues] Max program step: 0
+[05/24/2025 15:57:30][SubstituteValues] Response: IsSuccessful=False, ValuesCount=0, MismatchesCount=0, Error=User step 2 is incorrect. True step: 1, ExecutionTime=0
+[05/24/2025 15:57:30][SubstituteValues] Temporary files preserved: /app/code_files/temp_46_880418.cs, /app/code_files/46_880418_temp_values.json, /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 15:58:27][SubstituteValues] User data file content:
+12332 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/24/2025 15:58:27][SubstituteValues] Inserted Initialize call at line 11
+[05/24/2025 15:58:27][SubstituteValues] Temporary file created: /app/code_files/temp_46_880418.cs
+[05/24/2025 15:58:30][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 58
+, ErrorOutput=
+[05/24/2025 15:58:30][SubstituteValues] Values JSON file not found: /app/code_files/46_880418_temp_values.json
+[05/24/2025 15:58:30][SubstituteValues] Mismatches JSON file not found: /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 15:58:30][SubstituteValues] User steps: 1, 2, 3
+[05/24/2025 15:58:30][SubstituteValues] Max program step: 0
+[05/24/2025 15:58:30][SubstituteValues] Response: IsSuccessful=False, ValuesCount=0, MismatchesCount=0, Error=User step 2 is incorrect. True step: 1, ExecutionTime=0
+[05/24/2025 15:58:30][SubstituteValues] Temporary files preserved: /app/code_files/temp_46_880418.cs, /app/code_files/46_880418_temp_values.json, /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 16:00:09][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/24/2025 16:00:09][SubstituteValues] Inserted Initialize call at line 11
+[05/24/2025 16:00:09][SubstituteValues] Temporary file created: /app/code_files/temp_46_880418.cs
+[05/24/2025 16:00:09][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 58
+, ErrorOutput=
+[05/24/2025 16:00:09][SubstituteValues] Values JSON file not found: /app/code_files/46_880418_temp_values.json
+[05/24/2025 16:00:09][SubstituteValues] Mismatches JSON file not found: /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 16:00:09][SubstituteValues] User steps: 1, 2, 3
+[05/24/2025 16:00:09][SubstituteValues] Max program step: 0
+[05/24/2025 16:00:09][SubstituteValues] Response: IsSuccessful=False, ValuesCount=0, MismatchesCount=0, Error=User step 2 is incorrect. True step: 1, ExecutionTime=0
+[05/24/2025 16:00:09][SubstituteValues] Temporary files preserved: /app/code_files/temp_46_880418.cs, /app/code_files/46_880418_temp_values.json, /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 16:09:01][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/24/2025 16:09:01][SubstituteValues] Inserted Initialize call at line 11
+[05/24/2025 16:09:01][SubstituteValues] Temporary file created: /app/code_files/temp_46_880418.cs
+[05/24/2025 16:09:03][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 58
+, ErrorOutput=
+[05/24/2025 16:09:03][SubstituteValues] Values JSON file not found: /app/code_files/46_880418_temp_values.json
+[05/24/2025 16:09:03][SubstituteValues] Mismatches JSON file not found: /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 16:09:03][SubstituteValues] Read values TXT: 357 items
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//6
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//6
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//6
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+[05/24/2025 16:09:03][SubstituteValues] Read mismatches TXT: 467 items
+1//sum//0//5
+1//sum//0//5
+2//sum//6//16
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+1//sum//0//5
+2//sum//6//16
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+1//sum//0//5
+2//sum//6//16
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+1//sum//0//5
+2//sum//6//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+[05/24/2025 16:09:03][SubstituteValues] User steps: 1, 2, 3
+[05/24/2025 16:09:03][SubstituteValues] Max program step: 3
+[05/24/2025 16:09:03][SubstituteValues] Response: IsSuccessful=True, ValuesCount=357, MismatchesCount=467, Error=, ExecutionTime=0
+[05/24/2025 16:09:03][SubstituteValues] Temporary files preserved: /app/code_files/temp_46_880418.cs, /app/code_files/46_880418_temp_values.json, /app/code_files/46_880418_temp_mismatches.json, /app/code_files/46_880418values.txt, /app/code_files/46_880418mismatches.txt
+[05/24/2025 16:15:15][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/24/2025 16:15:15][SubstituteValues] Cleared values file: /app/code_files/46_880418values.txt
+[05/24/2025 16:15:15][SubstituteValues] Cleared mismatches file: /app/code_files/46_880418mismatches.txt
+[05/24/2025 16:15:15][SubstituteValues] Inserted Initialize call at line 11
+[05/24/2025 16:15:15][SubstituteValues] Temporary file created: /app/code_files/temp_46_880418.cs
+[05/24/2025 16:15:17][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 58
+, ErrorOutput=
+[05/24/2025 16:15:17][SubstituteValues] Values JSON file not found: /app/code_files/46_880418_temp_values.json
+[05/24/2025 16:15:17][SubstituteValues] Mismatches JSON file not found: /app/code_files/46_880418_temp_mismatches.json
+[05/24/2025 16:15:17][SubstituteValues] Read values TXT: 21 items
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+[05/24/2025 16:15:17][SubstituteValues] Read mismatches TXT: 25 items
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+[05/24/2025 16:15:17][SubstituteValues] User steps: 1, 2, 3
+[05/24/2025 16:15:17][SubstituteValues] Max program step: 3
+[05/24/2025 16:15:17][SubstituteValues] Response: IsSuccessful=True, ValuesCount=21, MismatchesCount=25, Error=, ExecutionTime=0
+[05/24/2025 16:15:17][SubstituteValues] Temporary files preserved: /app/code_files/temp_46_880418.cs, /app/code_files/46_880418_temp_values.json, /app/code_files/46_880418_temp_mismatches.json, /app/code_files/46_880418values.txt, /app/code_files/46_880418mismatches.txt

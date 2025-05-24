@@ -14,134 +14,120 @@ namespace InterpretatorService.Services
     {
         private readonly List<string> _valuesOutput = new List<string>();
         private static int _stepCounter;
-
+        private static string _codeId;
         public static Action<string, (string Name, object Value)[]> TrackDelegate { get; set; }
 
-        public string GetTrackerMethodCode(string codeId)
+        public static string GetTrackerMethodCode(string codeId)
         {
-            return $@"
+            _codeId = codeId;
+            return @"
 using System;
+using System.IO;
 using System.Linq;
 
 public static class VariableTracker
-{{
+{
     private static int _stepCounter = 0;
+    private static string _codeId = """ + codeId + @""";
 
-    public static void TrackVariables(params (string Name, object Value)[] variables)
-    {{
+    public static void TrackVariables(int methodId, params (string Name, object Value)[] variables)
+    {
         var lines = new System.Collections.Generic.List<string>();
         int step = System.Threading.Interlocked.Increment(ref _stepCounter);
 
         foreach (var v in variables)
-        {{
+        {
             if (v.Value == null)
-            {{
-                lines.Add($""{{step}}//{{v.Name}}//unknown//0//null"");
+            {
+                lines.Add($""{step}//{methodId}//{v.Name}//unknown//0//null"");
                 continue;
-            }}
+            }
 
             string typeName = v.Value.GetType().Name;
             int rank = v.Value is Array ? ((Array)v.Value).Rank : 0;
             string valueString;
 
             if (rank == 0)
-            {{
+            {
                 valueString = v.Value.ToString();
-                lines.Add($""{{step}}//{{v.Name}}//{{typeName}}//0//{{valueString}}"");
-            }}
+                lines.Add($""{step}//{methodId}//{v.Name}//{typeName}//0//{valueString}"");
+            }
             else if (rank == 1)
-            {{
-                typeName = $""{{v.Value.GetType().GetElementType().Name}}[]"";
+            {
+                typeName = $""{v.Value.GetType().GetElementType().Name}[]"";
                 var array = (Array)v.Value;
                 valueString = string.Join("","", array.Cast<object>().Select(x => x?.ToString() ?? ""null""));
-                lines.Add($""{{step}}//{{v.Name}}//{{typeName}}//1//{{valueString}}"");
-            }}
+                lines.Add($""{step}//{methodId}//{v.Name}//{typeName}//1//{valueString}"");
+            }
             else if (rank == 2)
-            {{
-                typeName = $""{{v.Value.GetType().GetElementType().Name}}[,]"";
+            {
+                typeName = $""{v.Value.GetType().GetElementType().Name}[,]"";
                 var array = (Array)v.Value;
                 for (int i = 0; i < array.GetLength(0); i++)
-                {{
+                {
                     var rowValues = new System.Collections.Generic.List<object>();
                     for (int j = 0; j < array.GetLength(1); j++)
-                    {{
+                    {
                         rowValues.Add(array.GetValue(i, j));
-                    }}
+                    }
                     valueString = string.Join("","", rowValues.Select(x => x?.ToString() ?? ""null""));
-                    lines.Add($""{{step}}//{{v.Name}}//{{typeName}}//2//{{valueString}}"");
-                }}
-            }}
-        }}
-
-        System.IO.File.AppendAllLines(""/app/code_files/{codeId}values.txt"", lines);
-    }}
-}}";
+                    lines.Add($""{step}//{methodId}//{v.Name}//{typeName}//2//{valueString}"");
+                }
+            }
         }
 
-        public async Task TrackVariables(string outputFilePath, params (string Name, object Value)[] variables)
-        {
-            _stepCounter++;
-            var stepLines = new List<string>();
+        System.IO.File.AppendAllLines(Path.Combine(""/app/code_files/"", $""{_codeId}values.txt""), lines);
+    }
+}";
+        }
 
-            foreach (var (name, value) in variables)
+        public static void TrackVariables(int methodId, params (string Name, object Value)[] variables)
+        {
+            var lines = new System.Collections.Generic.List<string>();
+            int step = System.Threading.Interlocked.Increment(ref _stepCounter);
+
+            foreach (var v in variables)
             {
-                if (value == null)
+                if (v.Value == null)
                 {
-                    stepLines.Add($"{_stepCounter}//{name}//unknown//0//null");
+                    lines.Add($"{step}//{methodId}//{v.Name}//unknown//0//null");
                     continue;
                 }
 
-                string typeName = value.GetType().Name;
-                int dimensionality = 0;
-                string[] valuesStrings;
+                string typeName = v.Value.GetType().Name;
+                int rank = v.Value is Array ? ((Array)v.Value).Rank : 0;
+                string valueString;
 
-                if (value.GetType().IsArray)
+                if (rank == 0)
                 {
-                    if (value is Array array)
-                    {
-                        dimensionality = array.Rank;
-                        if (dimensionality == 1)
-                        {
-                            typeName = $"{array.GetType().GetElementType().Name}[]";
-                            valuesStrings = new[] { string.Join(",", array.Cast<object>().Select(v => v?.ToString() ?? "null")) };
-                        }
-                        else if (dimensionality == 2)
-                        {
-                            typeName = $"{array.GetType().GetElementType().Name}[,]";
-                            valuesStrings = new string[array.GetLength(0)];
-                            for (int i = 0; i < array.GetLength(0); i++)
-                            {
-                                var rowValues = new List<object>();
-                                for (int j = 0; j < array.GetLength(1); j++)
-                                {
-                                    rowValues.Add(array.GetValue(i, j));
-                                }
-                                valuesStrings[i] = string.Join(",", rowValues.Select(v => v?.ToString() ?? "null"));
-                            }
-                        }
-                        else
-                        {
-                            valuesStrings = new[] { "unsupported" };
-                        }
-                    }
-                    else
-                    {
-                        valuesStrings = new[] { "unknown" };
-                    }
+                    valueString = v.Value.ToString();
+                    lines.Add($"{step}//{methodId}//{v.Name}//{typeName}//0//{valueString}");
                 }
-                else
+                else if (rank == 1)
                 {
-                    valuesStrings = new[] { value.ToString() };
+                    typeName = $"{v.Value.GetType().GetElementType().Name}[]";
+                    var array = (Array)v.Value;
+                    valueString = string.Join(",", array.Cast<object>().Select(x => x?.ToString() ?? "null"));
+                    lines.Add($"{step}//{methodId}//{v.Name}//{typeName}//1//{valueString}");
                 }
-
-                foreach (var valuesString in valuesStrings)
+                else if (rank == 2)
                 {
-                    stepLines.Add($"{_stepCounter}//{name}//{typeName}//{dimensionality}//{valuesString}");
+                    typeName = $"{v.Value.GetType().GetElementType().Name}[,]";
+                    var array = (Array)v.Value;
+                    for (int i = 0; i < array.GetLength(0); i++)
+                    {
+                        var rowValues = new System.Collections.Generic.List<object>();
+                        for (int j = 0; j < array.GetLength(1); j++)
+                        {
+                            rowValues.Add(array.GetValue(i, j));
+                        }
+                        valueString = string.Join(",", rowValues.Select(x => x?.ToString() ?? "null"));
+                        lines.Add($"{step}//{methodId}//{v.Name}//{typeName}//2//{valueString}");
+                    }
                 }
             }
 
-            _valuesOutput.AddRange(stepLines);
-            await File.WriteAllLinesAsync(outputFilePath, _valuesOutput);
+            System.IO.File.AppendAllLines(Path.Combine("/app/code_files/", $"{_codeId}values.txt"), lines);
         }
 
         public static bool IsVariableInitialized(string code, string variableName, int initLine)

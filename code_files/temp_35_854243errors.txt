@@ -1,0 +1,9 @@
+A local or parameter named 'updates' cannot be declared in this scope because that name is used in an enclosing local scope to define a local or parameter
+Cannot implicitly convert type 'object' to 'int[]'. An explicit conversion exists (are you missing a cast?)
+Cannot implicitly convert type 'object' to 'int'. An explicit conversion exists (are you missing a cast?)
+Cannot implicitly convert type 'object' to 'int'. An explicit conversion exists (are you missing a cast?)
+A local or parameter named 'updates' cannot be declared in this scope because that name is used in an enclosing local scope to define a local or parameter
+Cannot implicitly convert type 'object' to 'int[]'. An explicit conversion exists (are you missing a cast?)
+Cannot implicitly convert type 'object' to 'int'. An explicit conversion exists (are you missing a cast?)
+Cannot implicitly convert type 'object' to 'int[]'. An explicit conversion exists (are you missing a cast?)
+Cannot implicitly convert type 'int' to 'bool'
