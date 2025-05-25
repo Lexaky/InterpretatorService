@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using System.Text.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,13 +9,16 @@ public static class TestVariableTracker
 {
     private static string _codeId;
     private static string _userDataPath;
+    private static readonly HashSet<string> _mismatchKeys = new HashSet<string>();
 
-    public static void Initialize(string codeId, string userDataPath)
+    public static async Task Initialize(string codeId, string userDataPath)
     {
         _codeId = codeId;
         _userDataPath = userDataPath;
-        File.AppendAllTextAsync("/app/code_files/debug.txt",
-            $"[{DateTime.Now}][TestVariableTracker] Initialized: codeId={codeId}, userDataPath={userDataPath}\n").GetAwaiter().GetResult();
+        _mismatchKeys.Clear();
+
+        await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt",
+            $"[{DateTime.Now}][TestVariableTracker] Initialized: codeId={codeId}, userDataPath={userDataPath}\n");
     }
 
     public class ValueData
@@ -31,6 +33,7 @@ public static class TestVariableTracker
 
     public class MismatchData
     {
+        public int TrackerHitId { get; set; }
         public int LineNumber { get; set; }
         public string VariableName { get; set; }
         public string ExpectedValue { get; set; }
@@ -41,70 +44,191 @@ public static class TestVariableTracker
     {
         try
         {
-            await File.AppendAllTextAsync("/app/code_files/debug.txt",
+            await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt",
                 $"[{DateTime.Now}][TrackVariables] Started: methodId={methodId}, lineNumber={lineNumber}, variables={string.Join(",", variables.Select(v => v.Name))}\n");
 
-            var values = new List<ValueData>();
-            var mismatches = new List<MismatchData>();
-            var userData = await File.ReadAllLinesAsync(_userDataPath);
+            var valuesLines = new List<string>();
+            var mismatchesLines = new List<string>();
+            var userData = await System.IO.File.ReadAllLinesAsync(_userDataPath);
             var userValues = userData.Skip(1)
                 .Select(l => l.Split(' ', StringSplitOptions.RemoveEmptyEntries))
                 .Where(parts => parts.Length >= 3 && int.TryParse(parts[0], out int id) && id == methodId)
-                .ToDictionary(parts => parts[1], parts => parts[2]);
+                .Select(parts => (VariableName: parts[1], Value: parts[2]))
+                .ToList();
 
-            await File.AppendAllTextAsync("/app/code_files/debug.txt",
-                $"[{DateTime.Now}][TrackVariables] User values for methodId={methodId}: {string.Join(",", userValues.Select(kv => $"{kv.Key}={kv.Value}"))}\n");
+            await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt",
+                $"[{DateTime.Now}][TrackVariables] User values for methodId={methodId}: {string.Join(",", userValues.Select(kv => $"{kv.VariableName}={kv.Value}"))}\n");
+
+            var updatedValues = new Dictionary<string, object>();
 
             foreach (var (name, value) in variables)
             {
                 string stringValue = value switch
                 {
-                    Array array => string.Join(",", array.Cast<object>()),
+                    Array array when array.Rank == 1 => string.Join(",", array.Cast<object>().Select(x => x?.ToString() ?? "null")),
+                    Array array when array.Rank == 2 => string.Join(";", Enumerable.Range(0, array.GetLength(0))
+                        .Select(i => string.Join(",", Enumerable.Range(0, array.GetLength(1))
+                            .Select(j => array.GetValue(i, j)?.ToString() ?? "null")))),
                     _ => value?.ToString() ?? "null"
                 };
 
-                values.Add(new ValueData
-                {
-                    TrackerHitId = methodId,
-                    LineNumber = lineNumber,
-                    VariableName = name,
-                    Type = value?.GetType().Name ?? "null",
-                    Rank = value is Array arr ? arr.Rank : 0,
-                    Value = stringValue
-                });
+                string typeName = value?.GetType().Name ?? "null";
+                int rank = value is Array arr ? arr.Rank : 0;
+                if (rank == 1)
+                    typeName = $"{value.GetType().GetElementType().Name}[]";
+                else if (rank == 2)
+                    typeName = $"{value.GetType().GetElementType().Name}[,]";
 
-                if (userValues.ContainsKey(name))
+                valuesLines.Add($"{lineNumber}//{methodId}//{name}//{typeName}//{rank}//{stringValue}");
+
+                var matchingUserValues = userValues.Where(uv => uv.VariableName == name).ToList();
+                foreach (var userValue in matchingUserValues)
                 {
-                    if (userValues[name] != stringValue)
+                    if (userValue.Value != stringValue)
                     {
-                        mismatches.Add(new MismatchData
+                        string mismatchKey = $"{methodId}//{lineNumber}//{name}//{userValue.Value}";
+                        if (_mismatchKeys.Add(mismatchKey))
                         {
-                            LineNumber = lineNumber,
-                            VariableName = name,
-                            ExpectedValue = userValues[name],
-                            ActualValue = stringValue
-                        });
+                            mismatchesLines.Add($"{methodId}//{lineNumber}//{name}//{stringValue}//{userValue.Value}");
+                        }
                     }
+                    updatedValues[name] = UpdateVariable(value, userValue.Value, value?.GetType());
                 }
             }
 
-            var valuesPath = $"/app/code_files/{_codeId}_temp_values.json";
-            var mismatchesPath = $"/app/code_files/{_codeId}_temp_mismatches.json";
+            var valuesPath = $"/app/code_files/{_codeId}values.txt";
+            var mismatchesPath = $"/app/code_files/{_codeId}mismatches.txt";
 
-            await File.WriteAllTextAsync(valuesPath, JsonSerializer.Serialize(values));
-            await File.WriteAllTextAsync(mismatchesPath, JsonSerializer.Serialize(mismatches));
+            if (!System.IO.File.Exists(valuesPath))
+            {
+                await System.IO.File.WriteAllTextAsync(valuesPath, string.Empty);
+                await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt",
+                    $"[{DateTime.Now}][TrackVariables] Created values file: {valuesPath}\n");
+            }
+            if (!System.IO.File.Exists(mismatchesPath))
+            {
+                await System.IO.File.WriteAllTextAsync(mismatchesPath, string.Empty);
+                await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt",
+                    $"[{DateTime.Now}][TrackVariables] Created mismatches file: {mismatchesPath}\n");
+            }
 
-            await File.AppendAllTextAsync("/app/code_files/debug.txt",
-                $"[{DateTime.Now}][TrackVariables] Completed: methodId={methodId}, lineNumber={lineNumber}, valuesCount={values.Count}, mismatchesCount={mismatches.Count}, valuesPath={valuesPath}, mismatchesPath={mismatchesPath}\n");
+            await System.IO.File.AppendAllLinesAsync(valuesPath, valuesLines);
+            await System.IO.File.AppendAllLinesAsync(mismatchesPath, mismatchesLines);
 
-            return variables.ToDictionary(v => v.Name, v => v.Value);
+            await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt",
+                $"[{DateTime.Now}][TrackVariables] Completed: methodId={methodId}, lineNumber={lineNumber}, valuesCount={valuesLines.Count}, mismatchesCount={mismatchesLines.Count}, valuesPath={valuesPath}, mismatchesPath={mismatchesPath}\n");
+
+            return updatedValues;
         }
         catch (Exception ex)
         {
-            await File.AppendAllTextAsync("/app/code_files/debug.txt",
+            await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt",
                 $"[{DateTime.Now}][TrackVariables] Error: methodId={methodId}, lineNumber={lineNumber}, message={ex.Message}, stackTrace={ex.StackTrace}\n");
             return new Dictionary<string, object>();
         }
+    }
+
+    private static object UpdateVariable(object variable, string userValue, Type variableType)
+    {
+        if (variableType == null || userValue == null)
+            return variable;
+
+        if (variableType == typeof(int))
+        {
+            if (int.TryParse(userValue, out int value))
+                return value;
+        }
+        else if (variableType == typeof(float))
+        {
+            if (float.TryParse(userValue.Replace(".", ","), out float value))
+                return value;
+        }
+        else if (variableType == typeof(double))
+        {
+            if (double.TryParse(userValue.Replace(".", ","), out double value))
+                return value;
+        }
+        else if (variableType == typeof(char))
+        {
+            if (userValue.StartsWith("'") && userValue.EndsWith("'") && userValue.Length == 3)
+                return userValue[1];
+        }
+        else if (variableType == typeof(string))
+        {
+            if (userValue.StartsWith("\"") && userValue.EndsWith("\""))
+                return userValue.Substring(1, userValue.Length - 2);
+        }
+        else if (variableType == typeof(int[]))
+        {
+            var values = userValue.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => int.Parse(v.Trim()))
+                .ToArray();
+            return values;
+        }
+        else if (variableType == typeof(float[]))
+        {
+            var values = userValue.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => float.Parse(v.Trim().Replace(".", ",")))
+                .ToArray();
+            return values;
+        }
+        else if (variableType == typeof(double[]))
+        {
+            var values = userValue.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => double.Parse(v.Trim().Replace(".", ",")))
+                .ToArray();
+            return values;
+        }
+        else if (variableType == typeof(int[,]))
+        {
+            var rows = userValue.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(v => int.Parse(v.Trim()))
+                    .ToArray())
+                .ToArray();
+            if (rows.Length > 0 && rows[0].Length > 0)
+            {
+                var newArray = new int[rows.Length, rows[0].Length];
+                for (int i = 0; i < rows.Length; i++)
+                    for (int j = 0; j < rows[i].Length; j++)
+                        newArray[i, j] = rows[i][j];
+                return newArray;
+            }
+        }
+        else if (variableType == typeof(float[,]))
+        {
+            var rows = userValue.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(v => float.Parse(v.Trim().Replace(".", ",")))
+                    .ToArray())
+                .ToArray();
+            if (rows.Length > 0 && rows[0].Length > 0)
+            {
+                var newArray = new float[rows.Length, rows[0].Length];
+                for (int i = 0; i < rows.Length; i++)
+                    for (int j = 0; j < rows[i].Length; j++)
+                        newArray[i, j] = rows[i][j];
+                return newArray;
+            }
+        }
+        else if (variableType == typeof(double[,]))
+        {
+            var rows = userValue.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(v => double.Parse(v.Trim().Replace(".", ",")))
+                    .ToArray())
+                .ToArray();
+            if (rows.Length > 0 && rows[0].Length > 0)
+            {
+                var newArray = new double[rows.Length, rows[0].Length];
+                for (int i = 0; i < rows.Length; i++)
+                    for (int j = 0; j < rows[i].Length; j++)
+                        newArray[i, j] = rows[i][j];
+                return newArray;
+            }
+        }
+
+        return variable;
     }
 
     public static string GetTrackerMethodCode(string codeId)
@@ -113,7 +237,6 @@ public static class TestVariableTracker
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using System.Text.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -122,13 +245,16 @@ public static class TestVariableTracker
 {
     private static string _codeId;
     private static string _userDataPath;
+    private static readonly HashSet<string> _mismatchKeys = new HashSet<string>();
 
-    public static void Initialize(string codeId, string userDataPath)
+    public static async Task Initialize(string codeId, string userDataPath)
     {
         _codeId = codeId;
         _userDataPath = userDataPath;
-        File.AppendAllTextAsync(""/app/code_files/debug.txt"",
-            $""[{DateTime.Now}][TestVariableTracker] Initialized: codeId={codeId}, userDataPath={userDataPath}\n"").GetAwaiter().GetResult();
+        _mismatchKeys.Clear();
+
+        await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+            $""[{DateTime.Now}][TestVariableTracker] Initialized: codeId={codeId}, userDataPath={userDataPath}\n"");
     }
 
     public class ValueData
@@ -143,6 +269,7 @@ public static class TestVariableTracker
 
     public class MismatchData
     {
+        public int TrackerHitId { get; set; }
         public int LineNumber { get; set; }
         public string VariableName { get; set; }
         public string ExpectedValue { get; set; }
@@ -153,70 +280,191 @@ public static class TestVariableTracker
     {
         try
         {
-            await File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+            await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
                 $""[{DateTime.Now}][TrackVariables] Started: methodId={methodId}, lineNumber={lineNumber}, variables={string.Join("","", variables.Select(v => v.Name))}\n"");
 
-            var values = new List<ValueData>();
-            var mismatches = new List<MismatchData>();
-            var userData = await File.ReadAllLinesAsync(_userDataPath);
+            var valuesLines = new List<string>();
+            var mismatchesLines = new List<string>();
+            var userData = await System.IO.File.ReadAllLinesAsync(_userDataPath);
             var userValues = userData.Skip(1)
                 .Select(l => l.Split(' ', StringSplitOptions.RemoveEmptyEntries))
                 .Where(parts => parts.Length >= 3 && int.TryParse(parts[0], out int id) && id == methodId)
-                .ToDictionary(parts => parts[1], parts => parts[2]);
+                .Select(parts => (VariableName: parts[1], Value: parts[2]))
+                .ToList();
 
-            await File.AppendAllTextAsync(""/app/code_files/debug.txt"",
-                $""[{DateTime.Now}][TrackVariables] User values for methodId={methodId}: {string.Join("","", userValues.Select(kv => $""{kv.Key}={kv.Value}""))}\n"");
+            await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+                $""[{DateTime.Now}][TrackVariables] User values for methodId={methodId}: {string.Join("","", userValues.Select(kv => $""{kv.VariableName}={kv.Value}""))}\n"");
+
+            var updatedValues = new Dictionary<string, object>();
 
             foreach (var (name, value) in variables)
             {
                 string stringValue = value switch
                 {
-                    Array array => string.Join("","", array.Cast<object>()),
+                    Array array when array.Rank == 1 => string.Join("","", array.Cast<object>().Select(x => x?.ToString() ?? ""null"")),
+                    Array array when array.Rank == 2 => string.Join("";"", Enumerable.Range(0, array.GetLength(0))
+                        .Select(i => string.Join("","", Enumerable.Range(0, array.GetLength(1))
+                            .Select(j => array.GetValue(i, j)?.ToString() ?? ""null"")))),
                     _ => value?.ToString() ?? ""null""
                 };
 
-                values.Add(new ValueData
-                {
-                    TrackerHitId = methodId,
-                    LineNumber = lineNumber,
-                    VariableName = name,
-                    Type = value?.GetType().Name ?? ""null"",
-                    Rank = value is Array arr ? arr.Rank : 0,
-                    Value = stringValue
-                });
+                string typeName = value?.GetType().Name ?? ""null"";
+                int rank = value is Array arr ? arr.Rank : 0;
+                if (rank == 1)
+                    typeName = $""{value.GetType().GetElementType().Name}[]""; 
+                else if (rank == 2)
+                    typeName = $""{value.GetType().GetElementType().Name}[,]"";
+                
+                valuesLines.Add($""{lineNumber}//{methodId}//{name}//{typeName}//{rank}//{stringValue}"");
 
-                if (userValues.ContainsKey(name))
+                var matchingUserValues = userValues.Where(uv => uv.VariableName == name).ToList();
+                foreach (var userValue in matchingUserValues)
                 {
-                    if (userValues[name] != stringValue)
+                    if (userValue.Value != stringValue)
                     {
-                        mismatches.Add(new MismatchData
+                        string mismatchKey = $""{methodId}//{lineNumber}//{name}//{userValue.Value}"";
+                        if (_mismatchKeys.Add(mismatchKey))
                         {
-                            LineNumber = lineNumber,
-                            VariableName = name,
-                            ExpectedValue = userValues[name],
-                            ActualValue = stringValue
-                        });
+                            mismatchesLines.Add($""{methodId}//{lineNumber}//{name}//{stringValue}//{userValue.Value}"");
+                        }
                     }
+                    updatedValues[name] = UpdateVariable(value, userValue.Value, value?.GetType());
                 }
             }
 
-            var valuesPath = $""{Directory.GetCurrentDirectory()}/app/code_files/{_codeId}_temp_values.json"";
-            var mismatchesPath = $""{Directory.GetCurrentDirectory()}/app/code_files/{_codeId}_temp_mismatches.json"";
+            var valuesPath = $""/app/code_files/{_codeId}values.txt"";
+            var mismatchesPath = $""/app/code_files/{_codeId}mismatches.txt"";
 
-            await File.WriteAllTextAsync(valuesPath, JsonSerializer.Serialize(values));
-            await File.WriteAllTextAsync(mismatchesPath, JsonSerializer.Serialize(mismatches));
+            if (!System.IO.File.Exists(valuesPath))
+            {
+                await System.IO.File.WriteAllTextAsync(valuesPath, string.Empty);
+                await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+                    $""[{DateTime.Now}][TrackVariables] Created values file: {valuesPath}\n"");
+            }
+            if (!System.IO.File.Exists(mismatchesPath))
+            {
+                await System.IO.File.WriteAllTextAsync(mismatchesPath, string.Empty);
+                await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+                    $""[{DateTime.Now}][TrackVariables] Created mismatches file: {mismatchesPath}\n"");
+            }
 
-            await File.AppendAllTextAsync(""/app/code_files/debug.txt"",
-                $""[{DateTime.Now}][TrackVariables] Completed: methodId={methodId}, lineNumber={lineNumber}, valuesCount={values.Count}, mismatchesCount={mismatches.Count}, valuesPath={valuesPath}, mismatchesPath={mismatchesPath}\n"");
+            await System.IO.File.AppendAllLinesAsync(valuesPath, valuesLines);
+            await System.IO.File.AppendAllLinesAsync(mismatchesPath, mismatchesLines);
 
-            return variables.ToDictionary(v => v.Name, v => v.Value);
+            await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+                $""[{DateTime.Now}][TrackVariables] Completed: methodId={methodId}, lineNumber={lineNumber}, valuesCount={valuesLines.Count}, mismatchesCount={mismatchesLines.Count}, valuesPath={valuesPath}, mismatchesPath={mismatchesPath}\n"");
+
+            return updatedValues;
         }
         catch (Exception ex)
         {
-            await File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+            await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
                 $""[{DateTime.Now}][TrackVariables] Error: methodId={methodId}, lineNumber={lineNumber}, message={ex.Message}, stackTrace={ex.StackTrace}\n"");
             return new Dictionary<string, object>();
         }
+    }
+
+    private static object UpdateVariable(object variable, string userValue, Type variableType)
+    {
+        if (variableType == null || userValue == null)
+            return variable;
+
+        if (variableType == typeof(int))
+        {
+            if (int.TryParse(userValue, out int value))
+                return value;
+        }
+        else if (variableType == typeof(float))
+        {
+            if (float.TryParse(userValue.Replace(""."", "",""), out float value))
+                return value;
+        }
+        else if (variableType == typeof(double))
+        {
+            if (double.TryParse(userValue.Replace(""."", "",""), out double value))
+                return value;
+        }
+        else if (variableType == typeof(char))
+        {
+            if (userValue.StartsWith(""'"") && userValue.EndsWith(""'"") && userValue.Length == 3)
+                return userValue[1];
+        }
+        else if (variableType == typeof(string))
+        {
+            if (userValue.StartsWith(""\"""") && userValue.EndsWith(""\""""))
+                return userValue.Substring(1, userValue.Length - 2);
+        }
+        else if (variableType == typeof(int[]))
+        {
+            var values = userValue.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => int.Parse(v.Trim()))
+                .ToArray();
+            return values;
+        }
+        else if (variableType == typeof(float[]))
+        {
+            var values = userValue.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => float.Parse(v.Trim().Replace(""."", "","")))
+                .ToArray();
+            return values;
+        }
+        else if (variableType == typeof(double[]))
+        {
+            var values = userValue.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => double.Parse(v.Trim().Replace(""."", "","")))
+                .ToArray();
+            return values;
+        }
+        else if (variableType == typeof(int[,]))
+        {
+            var rows = userValue.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(v => int.Parse(v.Trim()))
+                    .ToArray())
+                .ToArray();
+            if (rows.Length > 0 && rows[0].Length > 0)
+            {
+                var newArray = new int[rows.Length, rows[0].Length];
+                for (int i = 0; i < rows.Length; i++)
+                    for (int j = 0; j < rows[i].Length; j++)
+                        newArray[i, j] = rows[i][j];
+                return newArray;
+            }
+        }
+        else if (variableType == typeof(float[,]))
+        {
+            var rows = userValue.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(v => float.Parse(v.Trim().Replace(""."", "","")))
+                    .ToArray())
+                .ToArray();
+            if (rows.Length > 0 && rows[0].Length > 0)
+            {
+                var newArray = new float[rows.Length, rows[0].Length];
+                for (int i = 0; i < rows.Length; i++)
+                    for (int j = 0; j < rows[i].Length; j++)
+                        newArray[i, j] = rows[i][j];
+                return newArray;
+            }
+        }
+        else if (variableType == typeof(double[,]))
+        {
+            var rows = userValue.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(v => double.Parse(v.Trim().Replace(""."", "","")))
+                    .ToArray())
+                .ToArray();
+            if (rows.Length > 0 && rows[0].Length > 0)
+            {
+                var newArray = new double[rows.Length, rows[0].Length];
+                for (int i = 0; i < rows.Length; i++)
+                    for (int j = 0; j < rows[i].Length; j++)
+                        newArray[i, j] = rows[i][j];
+                return newArray;
+            }
+        }
+
+        return variable;
     }
 }";
     }

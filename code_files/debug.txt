@@ -971,3 +971,356 @@
 [05/24/2025 16:15:17][SubstituteValues] Max program step: 3
 [05/24/2025 16:15:17][SubstituteValues] Response: IsSuccessful=True, ValuesCount=21, MismatchesCount=25, Error=, ExecutionTime=0
 [05/24/2025 16:15:17][SubstituteValues] Temporary files preserved: /app/code_files/temp_46_880418.cs, /app/code_files/46_880418_temp_values.json, /app/code_files/46_880418_temp_mismatches.json, /app/code_files/46_880418values.txt, /app/code_files/46_880418mismatches.txt
+[05/25/2025 04:07:58][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/25/2025 04:07:58][SubstituteValues] Cleared values file: /app/code_files/46_880418values.txt
+[05/25/2025 04:07:58][SubstituteValues] Cleared mismatches file: /app/code_files/46_880418mismatches.txt
+[05/25/2025 04:07:58][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 04:07:58][SubstituteValues] Temporary file created: /app/code_files/temp_46_880418.cs
+[05/25/2025 04:08:01][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 58
+, ErrorOutput=
+[05/25/2025 04:08:01][SubstituteValues] Values JSON file not found: /app/code_files/46_880418_temp_values.json
+[05/25/2025 04:08:01][SubstituteValues] Mismatches JSON file not found: /app/code_files/46_880418_temp_mismatches.json
+[05/25/2025 04:08:01][SubstituteValues] Read values TXT: 21 items
+1//11//sum//Int32//0//0
+2//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+2//12//sum//Int32//0//1
+3//11//sum//Int32//0//16
+4//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+4//12//sum//Int32//0//33
+5//11//sum//Int32//0//33
+6//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+6//12//sum//Int32//0//36
+7//11//sum//Int32//0//36
+8//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+8//12//sum//Int32//0//40
+9//11//sum//Int32//0//40
+10//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+10//12//sum//Int32//0//45
+11//11//sum//Int32//0//45
+12//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+12//12//sum//Int32//0//51
+13//11//sum//Int32//0//51
+14//12//numbers//Int32[]//1//1,2,3,4,5,6,7
+14//12//sum//Int32//0//58
+[05/25/2025 04:08:01][SubstituteValues] Read mismatches TXT: 25 items
+2//sum//1//16
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+2//sum//1//16
+3//sum//16//31
+[05/25/2025 04:08:01][SubstituteValues] User steps: 1, 2, 3
+[05/25/2025 04:08:01][SubstituteValues] Max program step: 3
+[05/25/2025 04:08:01][SubstituteValues] Response: IsSuccessful=True, ValuesCount=21, MismatchesCount=25, Error=, ExecutionTime=0
+[05/25/2025 04:08:01][SubstituteValues] Temporary files preserved: /app/code_files/temp_46_880418.cs, /app/code_files/46_880418_temp_values.json, /app/code_files/46_880418_temp_mismatches.json, /app/code_files/46_880418values.txt, /app/code_files/46_880418mismatches.txt
+[05/25/2025 05:05:09][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/25/2025 05:05:09][SubstituteValues] Values file not found, will be created: /app/code_files/49_975407values.txt
+[05/25/2025 05:05:09][SubstituteValues] Mismatches file not found, will be created: /app/code_files/49_975407mismatches.txt
+[05/25/2025 05:05:09][SubstituteValues] Inserted Initialize call at line 12
+[05/25/2025 05:05:09][SubstituteValues] Temporary file created: /app/code_files/temp_49_975407.cs
+[05/25/2025 05:05:11][SubstituteValues] Execution completed: IsSuccessful=False, StandardOutput=, ErrorOutput=The type or namespace name 'Json' does not exist in the namespace 'System.Text' (are you missing an assembly reference?)
+[05/25/2025 05:05:11][SubstituteValues] Values TXT file not found: /app/code_files/49_975407values.txt
+[05/25/2025 05:05:11][SubstituteValues] Mismatches TXT file not found: /app/code_files/49_975407mismatches.txt
+[05/25/2025 05:05:11][SubstituteValues] User steps: 1, 2, 3
+[05/25/2025 05:05:11][SubstituteValues] Max program step: 0
+[05/25/2025 05:05:11][SubstituteValues] Response: IsSuccessful=False, ValuesCount=0, MismatchesCount=0, Error=User step 2 is incorrect. True step: 1, ExecutionTime=0
+[05/25/2025 05:05:11][SubstituteValues] Temporary files preserved: /app/code_files/temp_49_975407.cs, /app/code_files/49_975407values.txt, /app/code_files/49_975407mismatches.txt
+[05/25/2025 05:24:28][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/25/2025 05:24:28][SubstituteValues] Values file not found, will be created: /app/code_files/50_186991values.txt
+[05/25/2025 05:24:28][SubstituteValues] Mismatches file not found, will be created: /app/code_files/50_186991mismatches.txt
+[05/25/2025 05:24:28][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 05:24:28][SubstituteValues] Temporary file created: /app/code_files/temp_50_186991.cs
+[05/25/2025 05:24:31][TestVariableTracker] Initialized: codeId=50_186991, userDataPath=/app/code_files/50_186991_userdata.txt
+[05/25/2025 05:24:31][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:24:31][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:24:31][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/50_186991values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:24:31][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:24:31][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:24:31][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/50_186991values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:24:31][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:24:31][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:24:31][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/50_186991values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:24:31][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 30
+, ErrorOutput=
+[05/25/2025 05:24:31][SubstituteValues] Values TXT file not found: /app/code_files/50_186991values.txt
+[05/25/2025 05:24:31][SubstituteValues] Mismatches TXT file not found: /app/code_files/50_186991mismatches.txt
+[05/25/2025 05:24:31][SubstituteValues] Response: IsSuccessful=True, ValuesCount=0, MismatchesCount=0, Error=, ExecutionTime=0
+[05/25/2025 05:24:31][SubstituteValues] Temporary files preserved: /app/code_files/temp_50_186991.cs, /app/code_files/50_186991values.txt, /app/code_files/50_186991mismatches.txt
+[05/25/2025 05:34:36][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/25/2025 05:34:36][SubstituteValues] Created/Cleared values file: /app/code_files/51_778321values.txt
+[05/25/2025 05:34:36][SubstituteValues] Created/Cleared mismatches file: /app/code_files/51_778321mismatches.txt
+[05/25/2025 05:34:36][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 05:34:36][SubstituteValues] Temporary file created: /app/code_files/temp_51_778321.cs
+[05/25/2025 05:34:38][TestVariableTracker] Initialized: codeId=51_778321, userDataPath=/app/code_files/51_778321_userdata.txt
+[05/25/2025 05:34:38][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:34:38][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:34:38][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/51_778321values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:34:38][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:34:38][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:34:38][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/51_778321values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:34:38][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:34:38][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:34:38][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/51_778321values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:34:38][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 30
+, ErrorOutput=
+[05/25/2025 05:34:38][SubstituteValues] Read values TXT: 0 items
+
+[05/25/2025 05:34:38][SubstituteValues] Read mismatches TXT: 0 items
+
+[05/25/2025 05:34:38][SubstituteValues] Response: IsSuccessful=True, ValuesCount=0, MismatchesCount=0, Error=, ExecutionTime=0
+[05/25/2025 05:34:38][SubstituteValues] Temporary files preserved: /app/code_files/temp_51_778321.cs, /app/code_files/51_778321values.txt, /app/code_files/51_778321mismatches.txt
+[05/25/2025 05:37:51][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/25/2025 05:37:51][SubstituteValues] Created/Cleared values file: /app/code_files/52_366924values.txt
+[05/25/2025 05:37:51][SubstituteValues] Created/Cleared mismatches file: /app/code_files/52_366924mismatches.txt
+[05/25/2025 05:37:51][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 05:37:51][SubstituteValues] Temporary file created: /app/code_files/temp_52_366924.cs
+[05/25/2025 05:37:53][TestVariableTracker] Initialized: codeId=52_366924, userDataPath=/app/code_files/52_366924_userdata.txt
+[05/25/2025 05:37:53][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:37:53][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:37:53][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/52_366924values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:37:53][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:37:53][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:37:53][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/52_366924values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:37:53][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:37:53][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:37:53][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/app/code_files/52_366924values.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.WriteToFileAsync(String path, FileMode mode, String contents, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:37:53][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 30
+, ErrorOutput=
+[05/25/2025 05:37:53][SubstituteValues] Read values TXT: 0 items
+
+[05/25/2025 05:37:53][SubstituteValues] Read mismatches TXT: 0 items
+
+[05/25/2025 05:37:53][SubstituteValues] Response: IsSuccessful=True, ValuesCount=0, MismatchesCount=0, Error=, ExecutionTime=0
+[05/25/2025 05:37:53][SubstituteValues] Temporary files preserved: /app/code_files/temp_52_366924.cs, /app/code_files/52_366924values.txt, /app/code_files/52_366924mismatches.txt
+[05/25/2025 05:44:06][SubstituteValues] User data file content:
+46 880418
+1 numbers 5,4,3,2
+2 sum 16
+3 sum 31
+[05/25/2025 05:44:06][SubstituteValues] Created/Cleared values file: /app/code_files/53_405814values.txt
+[05/25/2025 05:44:06][SubstituteValues] Created/Cleared mismatches file: /app/code_files/53_405814mismatches.txt
+[05/25/2025 05:44:06][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 05:44:06][SubstituteValues] Temporary file created: /app/code_files/temp_53_405814.cs
+[05/25/2025 05:44:08][TestVariableTracker] Initialized: codeId=53_405814, userDataPath=/app/code_files/53_405814_userdata.txt
+[05/25/2025 05:44:08][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:44:08][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:44:08][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:44:08][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:44:08][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:44:08][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:44:08][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:44:08][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:44:08][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:44:08][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 30
+, ErrorOutput=
+[05/25/2025 05:44:08][SubstituteValues] Read values TXT: 3 items
+12//12//sum//Int32//0//5
+12//12//sum//Int32//0//15
+12//12//sum//Int32//0//30
+[05/25/2025 05:44:08][SubstituteValues] Read mismatches TXT: 0 items
+
+[05/25/2025 05:44:08][SubstituteValues] Response: IsSuccessful=True, ValuesCount=3, MismatchesCount=0, Error=, ExecutionTime=0
+[05/25/2025 05:44:08][SubstituteValues] Temporary files preserved: /app/code_files/temp_53_405814.cs, /app/code_files/53_405814values.txt, /app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:12][SubstituteValues] User data file content:
+53 405814
+1 sum 5
+2 sum 15
+3 sum 30
+[05/25/2025 05:48:12][SubstituteValues] Created/Cleared values file: /app/code_files/53_405814values.txt
+[05/25/2025 05:48:12][SubstituteValues] Created/Cleared mismatches file: /app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:12][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 05:48:12][SubstituteValues] Temporary file created: /app/code_files/temp_53_405814.cs
+[05/25/2025 05:48:12][TestVariableTracker] Initialized: codeId=53_405814, userDataPath=/app/code_files/53_405814_userdata.txt
+[05/25/2025 05:48:12][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:48:12][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:48:12][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:12][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:48:12][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:48:12][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:12][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:48:12][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:48:12][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:12][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 30
+, ErrorOutput=
+[05/25/2025 05:48:12][SubstituteValues] Read values TXT: 3 items
+12//12//sum//Int32//0//5
+12//12//sum//Int32//0//15
+12//12//sum//Int32//0//30
+[05/25/2025 05:48:12][SubstituteValues] Read mismatches TXT: 0 items
+
+[05/25/2025 05:48:12][SubstituteValues] Response: IsSuccessful=True, ValuesCount=3, MismatchesCount=0, Error=, ExecutionTime=0
+[05/25/2025 05:48:12][SubstituteValues] Temporary files preserved: /app/code_files/temp_53_405814.cs, /app/code_files/53_405814values.txt, /app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:27][SubstituteValues] User data file content:
+53 405814
+1 sum 5
+2 sum 15
+3 sum 31
+[05/25/2025 05:48:27][SubstituteValues] Created/Cleared values file: /app/code_files/53_405814values.txt
+[05/25/2025 05:48:27][SubstituteValues] Created/Cleared mismatches file: /app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:27][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 05:48:27][SubstituteValues] Temporary file created: /app/code_files/temp_53_405814.cs
+[05/25/2025 05:48:27][TestVariableTracker] Initialized: codeId=53_405814, userDataPath=/app/code_files/53_405814_userdata.txt
+[05/25/2025 05:48:27][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:48:27][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:48:27][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:27][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:48:27][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:48:27][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:27][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:48:27][TrackVariables] User values for methodId=12: 
+[05/25/2025 05:48:27][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/53_405814values.txt, mismatchesPath=/app/code_files/53_405814mismatches.txt
+[05/25/2025 05:48:27][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 30
+, ErrorOutput=
+[05/25/2025 05:48:27][SubstituteValues] Read values TXT: 3 items
+12//12//sum//Int32//0//5
+12//12//sum//Int32//0//15
+12//12//sum//Int32//0//30
+[05/25/2025 05:48:27][SubstituteValues] Read mismatches TXT: 0 items
+
+[05/25/2025 05:48:27][SubstituteValues] Response: IsSuccessful=True, ValuesCount=3, MismatchesCount=0, Error=, ExecutionTime=0
+[05/25/2025 05:48:27][SubstituteValues] Temporary files preserved: /app/code_files/temp_53_405814.cs, /app/code_files/53_405814values.txt, /app/code_files/53_405814mismatches.txt
+[05/25/2025 05:49:41][SubstituteValues] User data file content:
+53 405814
+12 sum 5
+12 sum 15
+12 sum 31
+[05/25/2025 05:49:41][SubstituteValues] Created/Cleared values file: /app/code_files/53_405814values.txt
+[05/25/2025 05:49:41][SubstituteValues] Created/Cleared mismatches file: /app/code_files/53_405814mismatches.txt
+[05/25/2025 05:49:41][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 05:49:41][SubstituteValues] Temporary file created: /app/code_files/temp_53_405814.cs
+[05/25/2025 05:49:41][TestVariableTracker] Initialized: codeId=53_405814, userDataPath=/app/code_files/53_405814_userdata.txt
+[05/25/2025 05:49:41][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:49:41][TrackVariables] Error: methodId=12, lineNumber=12, message=An item with the same key has already been added. Key: sum, stackTrace=   at System.Collections.Generic.Dictionary`2.TryInsert(TKey key, TValue value, InsertionBehavior behavior)
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:49:41][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:49:41][TrackVariables] Error: methodId=12, lineNumber=12, message=An item with the same key has already been added. Key: sum, stackTrace=   at System.Collections.Generic.Dictionary`2.TryInsert(TKey key, TValue value, InsertionBehavior behavior)
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:49:41][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 05:49:41][TrackVariables] Error: methodId=12, lineNumber=12, message=An item with the same key has already been added. Key: sum, stackTrace=   at System.Collections.Generic.Dictionary`2.TryInsert(TKey key, TValue value, InsertionBehavior behavior)
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/25/2025 05:49:41][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 30
+, ErrorOutput=
+[05/25/2025 05:49:41][SubstituteValues] Read values TXT: 0 items
+
+[05/25/2025 05:49:41][SubstituteValues] Read mismatches TXT: 0 items
+
+[05/25/2025 05:49:41][SubstituteValues] Response: IsSuccessful=True, ValuesCount=0, MismatchesCount=0, Error=, ExecutionTime=0
+[05/25/2025 05:49:41][SubstituteValues] Temporary files preserved: /app/code_files/temp_53_405814.cs, /app/code_files/53_405814values.txt, /app/code_files/53_405814mismatches.txt
+[05/25/2025 06:06:18][SubstituteValues] User data file content:
+53 405814
+12 sum 5
+12 sum 15
+12 sum 31
+[05/25/2025 06:06:18][SubstituteValues] Created/Cleared values file: /app/code_files/54_147498values.txt
+[05/25/2025 06:06:18][SubstituteValues] Created/Cleared mismatches file: /app/code_files/54_147498mismatches.txt
+[05/25/2025 06:06:18][SubstituteValues] Inserted Initialize call at line 11
+[05/25/2025 06:06:18][SubstituteValues] Temporary file created: /app/code_files/temp_54_147498.cs
+[05/25/2025 06:06:20][TestVariableTracker] Initialized: codeId=54_147498, userDataPath=/app/code_files/54_147498_userdata.txt
+[05/25/2025 06:06:21][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 06:06:21][TrackVariables] User values for methodId=12: sum=5,sum=15,sum=31
+[05/25/2025 06:06:21][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=2, valuesPath=/app/code_files/54_147498values.txt, mismatchesPath=/app/code_files/54_147498mismatches.txt
+[05/25/2025 06:06:21][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 06:06:21][TrackVariables] User values for methodId=12: sum=5,sum=15,sum=31
+[05/25/2025 06:06:21][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/54_147498values.txt, mismatchesPath=/app/code_files/54_147498mismatches.txt
+[05/25/2025 06:06:21][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/25/2025 06:06:21][TrackVariables] User values for methodId=12: sum=5,sum=15,sum=31
+[05/25/2025 06:06:21][TrackVariables] Completed: methodId=12, lineNumber=12, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/54_147498values.txt, mismatchesPath=/app/code_files/54_147498mismatches.txt
+[05/25/2025 06:06:21][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 31
+, ErrorOutput=
+[05/25/2025 06:06:21][SubstituteValues] Read values TXT: 3 items
+12//12//sum//Int32//0//5
+12//12//sum//Int32//0//41
+12//12//sum//Int32//0//46
+[05/25/2025 06:06:21][SubstituteValues] Read mismatches TXT: 3 items
+12//12//sum//5//15
+12//12//sum//5//31
+12//12//sum//41//5
+[05/25/2025 06:06:21][SubstituteValues] Response: IsSuccessful=True, ValuesCount=3, MismatchesCount=3, Error=, ExecutionTime=0
+[05/25/2025 06:06:21][SubstituteValues] Temporary files preserved: /app/code_files/temp_54_147498.cs, /app/code_files/54_147498values.txt, /app/code_files/54_147498mismatches.txt

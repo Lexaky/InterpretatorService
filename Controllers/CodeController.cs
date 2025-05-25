@@ -1007,22 +1007,22 @@ namespace InterpretatorService.Controllers
         {
             try
             {
-                var testFilePath = Path.Combine(StorageDirectory, $"test{codeId}_{testId}_modified.cs");
+                var testFilePath = System.IO.Path.Combine(StorageDirectory, $"test{codeId}_{testId}_modified.cs");
                 if (!System.IO.File.Exists(testFilePath))
                 {
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                         $"[{DateTime.Now}][SubstituteValues] Test file not found: {testFilePath}\n");
                     return NotFound($"Test file test{codeId}_{testId}_modified.cs not found.");
                 }
 
-                var userDataPath = Path.Combine(StorageDirectory, $"{codeId}_{testId}_userdata.txt");
-                using (var stream = new FileStream(userDataPath, FileMode.Create))
+                var userDataPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}_userdata.txt");
+                using (var stream = new System.IO.FileStream(userDataPath, System.IO.FileMode.Create))
                     await userDataFile.CopyToAsync(stream);
 
                 var userDataLines = await System.IO.File.ReadAllLinesAsync(userDataPath);
                 if (userDataLines.Length < 1)
                 {
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                         $"[{DateTime.Now}][SubstituteValues] User data file is empty\n");
                     return BadRequest("User data file is empty.");
                 }
@@ -1030,70 +1030,72 @@ namespace InterpretatorService.Controllers
                 var header = userDataLines[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 if (header.Length != 2 || !int.TryParse(header[0], out int userId) || !int.TryParse(header[1], out int testTaskId))
                 {
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                         $"[{DateTime.Now}][SubstituteValues] Invalid user data header: {string.Join(" ", header)}\n");
                     return BadRequest("Invalid user data header.");
                 }
 
-                await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                     $"[{DateTime.Now}][SubstituteValues] User data file content:\n{string.Join("\n", userDataLines)}\n");
 
-                // Очистка файлов values.txt и mismatches.txt перед выполнением
-                var txtValuesPath = Path.Combine(StorageDirectory, $"{codeId}_{testId}values.txt");
-                var txtMismatchesPath = Path.Combine(StorageDirectory, $"{codeId}_{testId}mismatches.txt");
+                // Создание файлов values.txt и mismatches.txt в начале метода
+                var txtValuesPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}values.txt");
+                var txtMismatchesPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}mismatches.txt");
                 try
                 {
-                    if (System.IO.File.Exists(txtValuesPath))
-                    {
-                        await System.IO.File.WriteAllTextAsync(txtValuesPath, string.Empty);
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Cleared values file: {txtValuesPath}\n");
-                    }
-                    if (System.IO.File.Exists(txtMismatchesPath))
-                    {
-                        await System.IO.File.WriteAllTextAsync(txtMismatchesPath, string.Empty);
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Cleared mismatches file: {txtMismatchesPath}\n");
-                    }
+                    await System.IO.File.WriteAllTextAsync(txtValuesPath, string.Empty);
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
+                        $"[{DateTime.Now}][SubstituteValues] Created/Cleared values file: {txtValuesPath}\n");
+
+                    await System.IO.File.WriteAllTextAsync(txtMismatchesPath, string.Empty);
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
+                        $"[{DateTime.Now}][SubstituteValues] Created/Cleared mismatches file: {txtMismatchesPath}\n");
                 }
                 catch (Exception ex)
                 {
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Error clearing files: {ex.Message}\n");
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
+                        $"[{DateTime.Now}][SubstituteValues] Error creating/clearing files: {ex.Message}\nStackTrace: {ex.StackTrace}\n");
+                    return StatusCode(500, new CodeExecutionResponse
+                    {
+                        IsSuccessful = false,
+                        Output = "",
+                        Error = $"Failed to create/clear values/mismatches files: {ex.Message}",
+                        Values = new List<TestVariableTracker.ValueData>(),
+                        Mismatches = new List<TestVariableTracker.MismatchData>(),
+                        ExecutionTime = 0
+                    });
                 }
 
                 var modifiedCode = await System.IO.File.ReadAllTextAsync(testFilePath);
-                var initializeLine = $"TestVariableTracker.Initialize(\"{codeId}_{testId}\", \"{userDataPath}\");";
+                var initializeLine = $"await TestVariableTracker.Initialize(\"{codeId}_{testId}\", \"{userDataPath}\");";
                 var lines = modifiedCode.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).ToList();
-                int mainIndex = lines.FindIndex(l => l.Contains("static void Main"));
+                int mainIndex = lines.FindIndex(l => l.Contains("static void Main") || l.Contains("static async Task Main"));
                 if (mainIndex >= 0)
                 {
+                    lines[mainIndex] = lines[mainIndex].Replace("static void Main", "static async Task Main");
                     int insertIndex = lines.FindIndex(mainIndex, l => l.Trim().StartsWith("{"));
                     if (insertIndex >= 0)
                     {
                         lines.Insert(insertIndex + 1, new string(' ', lines[insertIndex].TakeWhile(char.IsWhiteSpace).Count()) + initializeLine);
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                             $"[{DateTime.Now}][SubstituteValues] Inserted Initialize call at line {insertIndex + 2}\n");
                     }
                     else
                     {
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                             $"[{DateTime.Now}][SubstituteValues] Failed to find opening brace in Main method\n");
                     }
                 }
                 else
                 {
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                         $"[{DateTime.Now}][SubstituteValues] Main method not found in test file\n");
                 }
 
-                var tempFilePath = Path.Combine(StorageDirectory, $"temp_{codeId}_{testId}.cs");
+                var tempFilePath = System.IO.Path.Combine(StorageDirectory, $"temp_{codeId}_{testId}.cs");
                 await System.IO.File.WriteAllTextAsync(tempFilePath, string.Join("\n", lines));
-                await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                     $"[{DateTime.Now}][SubstituteValues] Temporary file created: {tempFilePath}\n");
-
-                var tempValuesPath = Path.Combine(StorageDirectory, $"{codeId}_{testId}_temp_values.json");
-                var tempMismatchesPath = Path.Combine(StorageDirectory, $"{codeId}_{testId}_temp_mismatches.json");
 
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(15));
                 var executionTask = _interpreterService.ExecuteCodeAsync(tempFilePath);
@@ -1116,61 +1118,18 @@ namespace InterpretatorService.Controllers
                     {
                         errorMessage = "Execution timed out after 15 seconds, possible infinite loop.";
                         stopwatch.Stop();
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                             $"[{DateTime.Now}][SubstituteValues] Execution timed out\n");
                     }
                     else
                     {
                         codeModel = await executionTask;
                         stopwatch.Stop();
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                             $"[{DateTime.Now}][SubstituteValues] Execution completed: IsSuccessful={codeModel.IsSuccessful}, StandardOutput={codeModel.StandardOutput}, ErrorOutput={codeModel.ErrorOutput}\n");
                     }
 
-                    // Читаем JSON-файлы
-                    if (System.IO.File.Exists(tempValuesPath))
-                    {
-                        try
-                        {
-                            var valuesJson = await System.IO.File.ReadAllTextAsync(tempValuesPath);
-                            values = System.Text.Json.JsonSerializer.Deserialize<List<TestVariableTracker.ValueData>>(valuesJson) ?? new List<TestVariableTracker.ValueData>();
-                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                                $"[{DateTime.Now}][SubstituteValues] Read values JSON: {values.Count} items\n{valuesJson}\n");
-                        }
-                        catch (Exception ex)
-                        {
-                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                                $"[{DateTime.Now}][SubstituteValues] Error reading values JSON: {ex.Message}\n");
-                        }
-                    }
-                    else
-                    {
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Values JSON file not found: {tempValuesPath}\n");
-                    }
-
-                    if (System.IO.File.Exists(tempMismatchesPath))
-                    {
-                        try
-                        {
-                            var mismatchesJson = await System.IO.File.ReadAllTextAsync(tempMismatchesPath);
-                            mismatches = System.Text.Json.JsonSerializer.Deserialize<List<TestVariableTracker.MismatchData>>(mismatchesJson) ?? new List<TestVariableTracker.MismatchData>();
-                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                                $"[{DateTime.Now}][SubstituteValues] Read mismatches JSON: {mismatches.Count} items\n{mismatchesJson}\n");
-                        }
-                        catch (Exception ex)
-                        {
-                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                                $"[{DateTime.Now}][SubstituteValues] Error reading mismatches JSON: {ex.Message}\n");
-                        }
-                    }
-                    else
-                    {
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Mismatches JSON file not found: {tempMismatchesPath}\n");
-                    }
-
-                    // Читаем текстовые файлы
+                    // Читаем TXT-файлы
                     if (System.IO.File.Exists(txtValuesPath))
                     {
                         try
@@ -1182,26 +1141,26 @@ namespace InterpretatorService.Controllers
                                 if (parts.Length < 6) return null;
                                 return new TestVariableTracker.ValueData
                                 {
+                                    LineNumber = int.TryParse(parts[0], out int lineNum) ? lineNum : 0,
                                     TrackerHitId = int.TryParse(parts[1], out int methodId) ? methodId : 0,
-                                    LineNumber = int.TryParse(parts[0], out int step) ? step : 0,
                                     VariableName = parts[2],
                                     Type = parts[3],
                                     Rank = int.TryParse(parts[4], out int rank) ? rank : 0,
                                     Value = parts[5]
                                 };
                             }).Where(v => v != null).ToList();
-                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                            await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                                 $"[{DateTime.Now}][SubstituteValues] Read values TXT: {values.Count} items\n{string.Join("\n", txtLines)}\n");
                         }
                         catch (Exception ex)
                         {
-                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                            await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                                 $"[{DateTime.Now}][SubstituteValues] Error reading values TXT: {ex.Message}\n");
                         }
                     }
                     else
                     {
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                             $"[{DateTime.Now}][SubstituteValues] Values TXT file not found: {txtValuesPath}\n");
                     }
 
@@ -1213,82 +1172,60 @@ namespace InterpretatorService.Controllers
                             mismatches = txtLines.Select(line =>
                             {
                                 var parts = line.Split("//");
-                                if (parts.Length < 4) return null;
+                                if (parts.Length < 5) return null;
                                 return new TestVariableTracker.MismatchData
                                 {
-                                    LineNumber = int.TryParse(parts[0], out int step) ? step : 0,
-                                    VariableName = parts[1],
-                                    ActualValue = parts[2],
-                                    ExpectedValue = parts[3]
+                                    TrackerHitId = int.TryParse(parts[0], out int methodId) ? methodId : 0,
+                                    LineNumber = int.TryParse(parts[1], out int lineNum) ? lineNum : 0,
+                                    VariableName = parts[2],
+                                    ActualValue = parts[3],
+                                    ExpectedValue = parts[4]
                                 };
                             }).Where(m => m != null).ToList();
-                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                            await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                                 $"[{DateTime.Now}][SubstituteValues] Read mismatches TXT: {mismatches.Count} items\n{string.Join("\n", txtLines)}\n");
                         }
                         catch (Exception ex)
                         {
-                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                            await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                                 $"[{DateTime.Now}][SubstituteValues] Error reading mismatches TXT: {ex.Message}\n");
                         }
                     }
                     else
                     {
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                             $"[{DateTime.Now}][SubstituteValues] Mismatches TXT file not found: {txtMismatchesPath}\n");
                     }
 
-                    var errorsPath = Path.Combine(StorageDirectory, $"{codeId}_{testId}_errors.txt");
-                    var outputPath = Path.Combine(StorageDirectory, $"{codeId}_{testId}_output.txt");
+                    var errorsPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}_errors.txt");
+                    var outputPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}_output.txt");
                     await System.IO.File.WriteAllTextAsync(errorsPath, codeModel.ErrorOutput ?? "");
                     await System.IO.File.WriteAllTextAsync(outputPath, codeModel.StandardOutput ?? "");
-
-                    var userSteps = userDataLines.Skip(1)
-                        .Select(l => l.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-                        .Where(parts => parts.Length >= 3 && int.TryParse(parts[0], out _))
-                        .Select(parts => int.Parse(parts[0]))
-                        .Distinct()
-                        .ToList();
-
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] User steps: {string.Join(", ", userSteps)}\n");
-
-                    var maxProgramStep = mismatches.Any()
-                        ? mismatches.Max(m => m.LineNumber)
-                        : values.Any() ? values.Max(v => v.LineNumber) : 0;
-
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Max program step: {maxProgramStep}\n");
-
-                    if (userSteps.Any(s => s > maxProgramStep + 1))
-                    {
-                        var invalidStep = userSteps.First(s => s > maxProgramStep + 1);
-                        errorMessage = $"User step {invalidStep} is incorrect. True step: {maxProgramStep + 1}";
-                    }
 
                     var response = new CodeExecutionResponse
                     {
                         IsSuccessful = codeModel.IsSuccessful && errorMessage == null,
                         Output = codeModel.StandardOutput ?? "",
-                        Error = errorMessage ?? codeModel.ErrorOutput ?? "",
+                        Error = errorMessage ?? (codeModel.IsSuccessful ? "" : codeModel.ErrorOutput ?? ""),
                         Values = values,
                         Mismatches = mismatches,
                         ExecutionTime = stopwatch.ElapsedMilliseconds
                     };
 
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                         $"[{DateTime.Now}][SubstituteValues] Response: IsSuccessful={response.IsSuccessful}, ValuesCount={response.Values.Count}, MismatchesCount={response.Mismatches.Count}, Error={response.Error}, ExecutionTime={response.ExecutionTime}\n");
 
                     return Ok(response);
                 }
                 finally
                 {
-                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Temporary files preserved: {tempFilePath}, {tempValuesPath}, {tempMismatchesPath}, {txtValuesPath}, {txtMismatchesPath}\n");
+                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
+                        $"[{DateTime.Now}][SubstituteValues] Temporary files preserved: {tempFilePath}, {txtValuesPath}, {txtMismatchesPath}\n");
                 }
             }
             catch (Exception ex)
             {
-                await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "debug.txt"),
+                await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
                     $"[{DateTime.Now}][SubstituteValues] Exception: {ex.Message}\nStackTrace: {ex.StackTrace}\n");
                 return StatusCode(500, new CodeExecutionResponse
                 {
@@ -1301,6 +1238,9 @@ namespace InterpretatorService.Controllers
                 });
             }
         }
+
+
+
         // Структура для хранения данных о точке трекинга
         private struct TrackingPoint
         {
@@ -1314,7 +1254,7 @@ namespace InterpretatorService.Controllers
         {
             try
             {
-                var testFilePath = Path.Combine(StorageDirectory, $"test{codeId}_{testId}.cs");
+                var testFilePath = System.IO.Path.Combine(StorageDirectory, $"test{codeId}_{testId}.cs");
                 if (!System.IO.File.Exists(testFilePath))
                     return NotFound($"Test file test{codeId}_{testId}.cs not found.");
 
@@ -1392,7 +1332,7 @@ namespace InterpretatorService.Controllers
 
                     if (lineNumber < 1 || lineNumber > lines.Count)
                     {
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "logs.txt"),
                             $"[{DateTime.Now}][ModifyTest] Invalid line number {lineNumber} for methodId {methodId}\n");
                         continue;
                     }
@@ -1429,7 +1369,7 @@ namespace InterpretatorService.Controllers
                     else if (!hasSemicolon && !hasOpeningBrace)
                     {
                         // Пропускаем, если строка не завершена
-                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "logs.txt"),
                             $"[{DateTime.Now}][ModifyTest] Skipping line {lineNumber} for methodId {methodId}: incomplete statement\n");
                         continue;
                     }
@@ -1480,8 +1420,6 @@ namespace InterpretatorService.Controllers
                     usings.Add("using System.Collections.Generic;");
                 if (!code.Contains("using System.Threading.Tasks;"))
                     usings.Add("using System.Threading.Tasks;");
-                if (!code.Contains("using System.Text.Json;"))
-                    usings.Add("using System.Text.Json;");
 
                 if (usings.Any())
                 {
@@ -1496,18 +1434,20 @@ namespace InterpretatorService.Controllers
                 lines.Add("\n");
                 lines.AddRange(trackerLines);
 
-                var modifiedFilePath = Path.Combine(StorageDirectory, $"test{codeId}_{testId}_modified.cs");
+                var modifiedFilePath = System.IO.Path.Combine(StorageDirectory, $"test{codeId}_{testId}_modified.cs");
                 await System.IO.File.WriteAllTextAsync(modifiedFilePath, string.Join("\n", lines));
 
                 return Ok("Test file modified successfully.");
             }
             catch (Exception ex)
             {
-                await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "logs.txt"),
                     $"[{DateTime.Now}][ModifyTest] Exception: {ex.Message}\nStackTrace: {ex.StackTrace}\n");
                 return StatusCode(500, $"Server error: {ex.Message}");
             }
         }
+
+
 
         private string ModifyCode(string code, List<(int LineNumber, string[] VariableNames)> trackLines, int codeId)
         {
