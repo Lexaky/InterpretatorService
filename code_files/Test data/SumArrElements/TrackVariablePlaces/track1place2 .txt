@@ -1,3 +1,2 @@
-1231 941524
 12 numbers sum
-11 sum
+14 sum

@@ -234,26 +234,21 @@ public static class TestVariableTracker
     public static string GetTrackerMethodCode(string codeId)
     {
         return @"
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-
 public static class TestVariableTracker
 {
     private static string _codeId;
     private static string _userDataPath;
     private static readonly HashSet<string> _mismatchKeys = new HashSet<string>();
+    private static int _currentStep = 0; // Текущий шаг выполнения
 
-    public static async Task Initialize(string codeId, string userDataPath)
+    public static void Initialize(string codeId, string userDataPath)
     {
         _codeId = codeId;
         _userDataPath = userDataPath;
         _mismatchKeys.Clear();
+        _currentStep = 0; // Сбрасываем шаг при инициализации
 
-        await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+        File.AppendAllText(""/app/code_files/debug.txt"",
             $""[{DateTime.Now}][TestVariableTracker] Initialized: codeId={codeId}, userDataPath={userDataPath}\n"");
     }
 
@@ -272,28 +267,36 @@ public static class TestVariableTracker
         public int TrackerHitId { get; set; }
         public int LineNumber { get; set; }
         public string VariableName { get; set; }
-        public string ExpectedValue { get; set; }
-        public string ActualValue { get; set; }
+        public string ExpectedValue { get; set; } // Значение программы
+        public string ActualValue { get; set; }   // Значение пользователя
     }
 
-    public static async Task<Dictionary<string, object>> TrackVariables(int methodId, int lineNumber, params (string Name, object Value)[] variables)
+    public static Dictionary<string, object> TrackVariables(int methodId, int lineNumber, params (string Name, object Value)[] variables)
     {
         try
         {
-            await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
-                $""[{DateTime.Now}][TrackVariables] Started: methodId={methodId}, lineNumber={lineNumber}, variables={string.Join("","", variables.Select(v => v.Name))}\n"");
+            _currentStep++; // Увеличиваем шаг при каждом вызове
+
+            File.AppendAllText(""/app/code_files/debug.txt"",
+                $""[{DateTime.Now}][TrackVariables] Started: step={_currentStep}, methodId={methodId}, lineNumber={lineNumber}, variables={string.Join("","", variables.Select(v => v.Name))}\n"");
 
             var valuesLines = new List<string>();
             var mismatchesLines = new List<string>();
-            var userData = await System.IO.File.ReadAllLinesAsync(_userDataPath);
-            var userValues = userData.Skip(1)
+            var userData = File.ReadAllLines(_userDataPath);
+            var userValues = userData
                 .Select(l => l.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-                .Where(parts => parts.Length >= 3 && int.TryParse(parts[0], out int id) && id == methodId)
-                .Select(parts => (VariableName: parts[1], Value: parts[2]))
+                .Where(parts => parts.Length >= 4 && int.TryParse(parts[0], out int step) && step == _currentStep && int.TryParse(parts[1], out int trackerId) && trackerId == methodId)
+                .Select(parts => (VariableName: parts[2], Value: parts[3]))
                 .ToList();
 
-            await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
-                $""[{DateTime.Now}][TrackVariables] User values for methodId={methodId}: {string.Join("","", userValues.Select(kv => $""{kv.VariableName}={kv.Value}""))}\n"");
+            // Проверяем, есть ли данные для текущего шага с неверным трекером
+            var wrongTrackerData = userData
+                .Select(l => l.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                .Where(parts => parts.Length >= 4 && int.TryParse(parts[0], out int step) && step == _currentStep && int.TryParse(parts[1], out int trackerId) && trackerId != methodId)
+                .ToList();
+
+            File.AppendAllText(""/app/code_files/debug.txt"",
+                $""[{DateTime.Now}][TrackVariables] User values for step={_currentStep}, methodId={methodId}: {string.Join("","", userValues.Select(kv => $""{kv.VariableName}={kv.Value}""))}\n"");
 
             var updatedValues = new Dictionary<string, object>();
 
@@ -311,55 +314,73 @@ public static class TestVariableTracker
                 string typeName = value?.GetType().Name ?? ""null"";
                 int rank = value is Array arr ? arr.Rank : 0;
                 if (rank == 1)
-                    typeName = $""{value.GetType().GetElementType().Name}[]""; 
+                    typeName = $""{value.GetType().GetElementType().Name}[]"";
                 else if (rank == 2)
                     typeName = $""{value.GetType().GetElementType().Name}[,]"";
-                
-                valuesLines.Add($""{lineNumber}//{methodId}//{name}//{typeName}//{rank}//{stringValue}"");
+
+                valuesLines.Add($""{_currentStep}//{methodId}//{name}//{typeName}//{rank}//{stringValue}"");
+
+                // Проверяем, есть ли данные с неверным трекером для текущего шага
+                if (wrongTrackerData.Any())
+                {
+                    string mismatchKey = $""{_currentStep}//{methodId}//{lineNumber}//{name}//wrong_tracker"";
+                    if (_mismatchKeys.Add(mismatchKey))
+                    {
+                        mismatchesLines.Add($""{_currentStep}//{methodId}//{lineNumber}//{name}//пользователь ушёл в другой шаг"");
+                    }
+                    updatedValues[name] = value; // Не подменяем значение
+                    continue; // Пропускаем дальнейшую обработку этой переменной
+                }
 
                 var matchingUserValues = userValues.Where(uv => uv.VariableName == name).ToList();
                 foreach (var userValue in matchingUserValues)
                 {
                     if (userValue.Value != stringValue)
                     {
-                        string mismatchKey = $""{methodId}//{lineNumber}//{name}//{userValue.Value}"";
+                        string mismatchKey = $""{_currentStep}//{methodId}//{lineNumber}//{name}//{userValue.Value}"";
                         if (_mismatchKeys.Add(mismatchKey))
                         {
-                            mismatchesLines.Add($""{methodId}//{lineNumber}//{name}//{stringValue}//{userValue.Value}"");
+                            mismatchesLines.Add($""{_currentStep}//{methodId}//{lineNumber}//{name}//{stringValue}//{userValue.Value}"");
                         }
                     }
                     updatedValues[name] = UpdateVariable(value, userValue.Value, value?.GetType());
+                }
+
+                // Если пользовательских данных для переменной нет, сохраняем исходное значение
+                if (!matchingUserValues.Any())
+                {
+                    updatedValues[name] = value;
                 }
             }
 
             var valuesPath = $""/app/code_files/{_codeId}values.txt"";
             var mismatchesPath = $""/app/code_files/{_codeId}mismatches.txt"";
 
-            if (!System.IO.File.Exists(valuesPath))
+            if (!File.Exists(valuesPath))
             {
-                await System.IO.File.WriteAllTextAsync(valuesPath, string.Empty);
-                await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+                File.WriteAllText(valuesPath, string.Empty);
+                File.AppendAllText(""/app/code_files/debug.txt"",
                     $""[{DateTime.Now}][TrackVariables] Created values file: {valuesPath}\n"");
             }
-            if (!System.IO.File.Exists(mismatchesPath))
+            if (!File.Exists(mismatchesPath))
             {
-                await System.IO.File.WriteAllTextAsync(mismatchesPath, string.Empty);
-                await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
+                File.WriteAllText(mismatchesPath, string.Empty);
+                File.AppendAllText(""/app/code_files/debug.txt"",
                     $""[{DateTime.Now}][TrackVariables] Created mismatches file: {mismatchesPath}\n"");
             }
 
-            await System.IO.File.AppendAllLinesAsync(valuesPath, valuesLines);
-            await System.IO.File.AppendAllLinesAsync(mismatchesPath, mismatchesLines);
+            File.AppendAllLines(valuesPath, valuesLines);
+            File.AppendAllLines(mismatchesPath, mismatchesLines);
 
-            await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
-                $""[{DateTime.Now}][TrackVariables] Completed: methodId={methodId}, lineNumber={lineNumber}, valuesCount={valuesLines.Count}, mismatchesCount={mismatchesLines.Count}, valuesPath={valuesPath}, mismatchesPath={mismatchesPath}\n"");
+            File.AppendAllText(""/app/code_files/debug.txt"",
+                $""[{DateTime.Now}][TrackVariables] Completed: step={_currentStep}, methodId={methodId}, lineNumber={lineNumber}, valuesCount={valuesLines.Count}, mismatchesCount={mismatchesLines.Count}, valuesPath={valuesPath}, mismatchesPath={mismatchesPath}\n"");
 
             return updatedValues;
         }
         catch (Exception ex)
         {
-            await System.IO.File.AppendAllTextAsync(""/app/code_files/debug.txt"",
-                $""[{DateTime.Now}][TrackVariables] Error: methodId={methodId}, lineNumber={lineNumber}, message={ex.Message}, stackTrace={ex.StackTrace}\n"");
+            File.AppendAllText(""/app/code_files/debug.txt"",
+                $""[{DateTime.Now}][TrackVariables] Error: step={_currentStep}, methodId={methodId}, lineNumber={lineNumber}, message={ex.Message}, stackTrace={ex.StackTrace}\n"");
             return new Dictionary<string, object>();
         }
     }

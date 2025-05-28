@@ -17,6 +17,8 @@ using InterpretatorService.Data;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Npgsql.Internal;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace InterpretatorService.Controllers
 {
@@ -1007,236 +1009,162 @@ namespace InterpretatorService.Controllers
         {
             try
             {
-                var testFilePath = System.IO.Path.Combine(StorageDirectory, $"test{codeId}_{testId}_modified.cs");
-                if (!System.IO.File.Exists(testFilePath))
+                // Формируем пути к файлам
+                string userDataPath = $"/app/code_files/{codeId}_{testId}_userdata.txt";
+                string valuesPath = $"/app/code_files/{codeId}_{testId}values.txt";
+                string mismatchesPath = $"/app/code_files/{codeId}_{testId}mismatches.txt";
+                string modifiedCodePath = $"/app/code_files/test{codeId}_{testId}modified.cs";
+                string debugPath = "/app/code_files/debug.txt";
+
+                // Проверяем существование модифицированного файла
+                if (!System.IO.File.Exists(modifiedCodePath))
                 {
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Test file not found: {testFilePath}\n");
-                    return NotFound($"Test file test{codeId}_{testId}_modified.cs not found.");
+                    string error = $"Модифицированный файл {modifiedCodePath} не найден.";
+                    await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Error: {error}\n");
+                    return BadRequest(error);
                 }
 
-                var userDataPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}_userdata.txt");
-                using (var stream = new System.IO.FileStream(userDataPath, System.IO.FileMode.Create))
+                // Проверяем входной файл userDataFile
+                if (userDataFile == null || userDataFile.Length == 0)
+                {
+                    string error = "Файл пользовательских данных не предоставлен или пуст.";
+                    await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Сохраняем пользовательский файл
+                using (var stream = new FileStream(userDataPath, FileMode.Create, FileAccess.Write))
+                {
                     await userDataFile.CopyToAsync(stream);
-
-                var userDataLines = await System.IO.File.ReadAllLinesAsync(userDataPath);
-                if (userDataLines.Length < 1)
-                {
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] User data file is empty\n");
-                    return BadRequest("User data file is empty.");
                 }
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Saved user data to {userDataPath}\n");
 
-                var header = userDataLines[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (header.Length != 2 || !int.TryParse(header[0], out int userId) || !int.TryParse(header[1], out int testTaskId))
-                {
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Invalid user data header: {string.Join(" ", header)}\n");
-                    return BadRequest("Invalid user data header.");
-                }
-
-                await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                    $"[{DateTime.Now}][SubstituteValues] User data file content:\n{string.Join("\n", userDataLines)}\n");
-
-                // Создание файлов values.txt и mismatches.txt в начале метода
-                var txtValuesPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}values.txt");
-                var txtMismatchesPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}mismatches.txt");
-                try
-                {
-                    await System.IO.File.WriteAllTextAsync(txtValuesPath, string.Empty);
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Created/Cleared values file: {txtValuesPath}\n");
-
-                    await System.IO.File.WriteAllTextAsync(txtMismatchesPath, string.Empty);
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Created/Cleared mismatches file: {txtMismatchesPath}\n");
-                }
-                catch (Exception ex)
-                {
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Error creating/clearing files: {ex.Message}\nStackTrace: {ex.StackTrace}\n");
-                    return StatusCode(500, new CodeExecutionResponse
-                    {
-                        IsSuccessful = false,
-                        Output = "",
-                        Error = $"Failed to create/clear values/mismatches files: {ex.Message}",
-                        Values = new List<TestVariableTracker.ValueData>(),
-                        Mismatches = new List<TestVariableTracker.MismatchData>(),
-                        ExecutionTime = 0
-                    });
-                }
-
-                var modifiedCode = await System.IO.File.ReadAllTextAsync(testFilePath);
-                var initializeLine = $"await TestVariableTracker.Initialize(\"{codeId}_{testId}\", \"{userDataPath}\");";
-                var lines = modifiedCode.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).ToList();
-                int mainIndex = lines.FindIndex(l => l.Contains("static void Main") || l.Contains("static async Task Main"));
-                if (mainIndex >= 0)
-                {
-                    lines[mainIndex] = lines[mainIndex].Replace("static void Main", "static async Task Main");
-                    int insertIndex = lines.FindIndex(mainIndex, l => l.Trim().StartsWith("{"));
-                    if (insertIndex >= 0)
-                    {
-                        lines.Insert(insertIndex + 1, new string(' ', lines[insertIndex].TakeWhile(char.IsWhiteSpace).Count()) + initializeLine);
-                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Inserted Initialize call at line {insertIndex + 2}\n");
-                    }
-                    else
-                    {
-                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Failed to find opening brace in Main method\n");
-                    }
-                }
-                else
-                {
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Main method not found in test file\n");
-                }
-
-                var tempFilePath = System.IO.Path.Combine(StorageDirectory, $"temp_{codeId}_{testId}.cs");
-                await System.IO.File.WriteAllTextAsync(tempFilePath, string.Join("\n", lines));
-                await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                    $"[{DateTime.Now}][SubstituteValues] Temporary file created: {tempFilePath}\n");
-
+                // Создаём/очищаем файлы values.txt и mismatches.txt
+                System.IO.File.WriteAllText(valuesPath, string.Empty);
+                System.IO.File.WriteAllText(mismatchesPath, string.Empty);
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Created/cleared {valuesPath} and {mismatchesPath}\n");
+                InterpreterService interpreterService = new InterpreterService();
+                // Выполняем модифицированный код с ограничением по времени (15 секунд)
+                var executionTask = interpreterService.ExecuteCodeAsync(modifiedCodePath);
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(15));
-                var executionTask = _interpreterService.ExecuteCodeAsync(tempFilePath);
                 var completedTask = await Task.WhenAny(executionTask, timeoutTask);
 
-                try
+                if (completedTask == timeoutTask)
                 {
-                    var values = new List<TestVariableTracker.ValueData>();
-                    var mismatches = new List<TestVariableTracker.MismatchData>();
-                    string errorMessage = null;
-                    var stopwatch = Stopwatch.StartNew();
-                    var codeModel = new CodeModel(codeId, tempFilePath)
-                    {
-                        IsSuccessful = false,
-                        StandardOutput = "",
-                        ErrorOutput = ""
-                    };
-
-                    if (completedTask == timeoutTask)
-                    {
-                        errorMessage = "Execution timed out after 15 seconds, possible infinite loop.";
-                        stopwatch.Stop();
-                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Execution timed out\n");
-                    }
-                    else
-                    {
-                        codeModel = await executionTask;
-                        stopwatch.Stop();
-                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Execution completed: IsSuccessful={codeModel.IsSuccessful}, StandardOutput={codeModel.StandardOutput}, ErrorOutput={codeModel.ErrorOutput}\n");
-                    }
-
-                    // Читаем TXT-файлы
-                    if (System.IO.File.Exists(txtValuesPath))
-                    {
-                        try
-                        {
-                            var txtLines = await System.IO.File.ReadAllLinesAsync(txtValuesPath);
-                            values = txtLines.Select(line =>
-                            {
-                                var parts = line.Split("//");
-                                if (parts.Length < 6) return null;
-                                return new TestVariableTracker.ValueData
-                                {
-                                    LineNumber = int.TryParse(parts[0], out int lineNum) ? lineNum : 0,
-                                    TrackerHitId = int.TryParse(parts[1], out int methodId) ? methodId : 0,
-                                    VariableName = parts[2],
-                                    Type = parts[3],
-                                    Rank = int.TryParse(parts[4], out int rank) ? rank : 0,
-                                    Value = parts[5]
-                                };
-                            }).Where(v => v != null).ToList();
-                            await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                                $"[{DateTime.Now}][SubstituteValues] Read values TXT: {values.Count} items\n{string.Join("\n", txtLines)}\n");
-                        }
-                        catch (Exception ex)
-                        {
-                            await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                                $"[{DateTime.Now}][SubstituteValues] Error reading values TXT: {ex.Message}\n");
-                        }
-                    }
-                    else
-                    {
-                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Values TXT file not found: {txtValuesPath}\n");
-                    }
-
-                    if (System.IO.File.Exists(txtMismatchesPath))
-                    {
-                        try
-                        {
-                            var txtLines = await System.IO.File.ReadAllLinesAsync(txtMismatchesPath);
-                            mismatches = txtLines.Select(line =>
-                            {
-                                var parts = line.Split("//");
-                                if (parts.Length < 5) return null;
-                                return new TestVariableTracker.MismatchData
-                                {
-                                    TrackerHitId = int.TryParse(parts[0], out int methodId) ? methodId : 0,
-                                    LineNumber = int.TryParse(parts[1], out int lineNum) ? lineNum : 0,
-                                    VariableName = parts[2],
-                                    ActualValue = parts[3],
-                                    ExpectedValue = parts[4]
-                                };
-                            }).Where(m => m != null).ToList();
-                            await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                                $"[{DateTime.Now}][SubstituteValues] Read mismatches TXT: {mismatches.Count} items\n{string.Join("\n", txtLines)}\n");
-                        }
-                        catch (Exception ex)
-                        {
-                            await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                                $"[{DateTime.Now}][SubstituteValues] Error reading mismatches TXT: {ex.Message}\n");
-                        }
-                    }
-                    else
-                    {
-                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                            $"[{DateTime.Now}][SubstituteValues] Mismatches TXT file not found: {txtMismatchesPath}\n");
-                    }
-
-                    var errorsPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}_errors.txt");
-                    var outputPath = System.IO.Path.Combine(StorageDirectory, $"{codeId}_{testId}_output.txt");
-                    await System.IO.File.WriteAllTextAsync(errorsPath, codeModel.ErrorOutput ?? "");
-                    await System.IO.File.WriteAllTextAsync(outputPath, codeModel.StandardOutput ?? "");
-
-                    var response = new CodeExecutionResponse
-                    {
-                        IsSuccessful = codeModel.IsSuccessful && errorMessage == null,
-                        Output = codeModel.StandardOutput ?? "",
-                        Error = errorMessage ?? (codeModel.IsSuccessful ? "" : codeModel.ErrorOutput ?? ""),
-                        Values = values,
-                        Mismatches = mismatches,
-                        ExecutionTime = stopwatch.ElapsedMilliseconds
-                    };
-
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Response: IsSuccessful={response.IsSuccessful}, ValuesCount={response.Values.Count}, MismatchesCount={response.Mismatches.Count}, Error={response.Error}, ExecutionTime={response.ExecutionTime}\n");
-
-                    return Ok(response);
+                    string error = "Выполнение кода превысило лимит времени (15 секунд).";
+                    await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Error: {error}\n");
+                    return StatusCode(500, error);
                 }
-                finally
+
+                var executionResult = await executionTask;
+                await System.IO.File.AppendAllTextAsync(debugPath,
+                    $"[{DateTime.Now}][SubstituteValues] Code executed: {modifiedCodePath}, " +
+                    $"IsSuccessful={executionResult.IsSuccessful}, " +
+                    $"StandardOutput={executionResult.StandardOutput?.Replace("\n", "\\n")}, " +
+                    $"ErrorOutput={executionResult.ErrorOutput?.Replace("\n", "\\n")}, " +
+                    $"WarningOutput={executionResult.WarningOutput?.Replace("\n", "\\n")}\n");
+
+                // Проверяем успешность выполнения
+                if (!executionResult.IsSuccessful)
                 {
-                    await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                        $"[{DateTime.Now}][SubstituteValues] Temporary files preserved: {tempFilePath}, {txtValuesPath}, {txtMismatchesPath}\n");
+                    string error = $"Ошибка выполнения кода: {executionResult.ErrorOutput ?? "Неизвестная ошибка"}";
+                    await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Error: {error}\n");
+                    return StatusCode(500, error);
                 }
+
+                // Читаем файлы values.txt и mismatches.txt
+                var values = new List<ValueData>();
+                var mismatches = new List<MismatchData>();
+
+                // Чтение values.txt
+                if (System.IO.File.Exists(valuesPath))
+                {
+                    string[] valueLines = await System.IO.File.ReadAllLinesAsync(valuesPath);
+                    foreach (var line in valueLines)
+                    {
+                        var parts = line.Split("//", StringSplitOptions.None);
+                        if (parts.Length >= 6 &&
+                            int.TryParse(parts[0], out int step) &&
+                            int.TryParse(parts[1], out int trackerHitId) &&
+                            int.TryParse(parts[4], out int rank))
+                        {
+                            values.Add(new ValueData
+                            {
+                                TrackerHitId = trackerHitId,
+                                LineNumber = trackerHitId, // methodId соответствует номеру строки
+                                VariableName = parts[2],
+                                Type = parts[3],
+                                Rank = rank,
+                                Value = parts[5]
+                            });
+                        }
+                    }
+                }
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Read {values.Count} values from {valuesPath}\n");
+
+                // Чтение mismatches.txt
+                if (System.IO.File.Exists(mismatchesPath))
+                {
+                    string[] mismatchLines = await System.IO.File.ReadAllLinesAsync(mismatchesPath);
+                    foreach (var line in mismatchLines)
+                    {
+                        var parts = line.Split("//", StringSplitOptions.None);
+                        if (parts.Length >= 5 &&
+                            int.TryParse(parts[0], out int step) &&
+                            int.TryParse(parts[1], out int trackerHitId) &&
+                            int.TryParse(parts[2], out int lineNumber))
+                        {
+                            mismatches.Add(new MismatchData
+                            {
+                                TrackerHitId = trackerHitId,
+                                LineNumber = lineNumber,
+                                VariableName = parts[3],
+                                ExpectedValue = parts.Length > 5 ? parts[4] : null,
+                                ActualValue = parts.Length > 5 ? parts[5] : parts[4] // Сообщение как ActualValue
+                            });
+                        }
+                    }
+                }
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Read {mismatches.Count} mismatches from {mismatchesPath}\n");
+
+                // Сериализуем данные в JSON
+                var response = new
+                {
+                    Values = values,
+                    Mismatches = mismatches
+                };
+                string jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Generated JSON response\n");
+
+                // Возвращаем JSON
+                return Content(jsonResponse, "application/json");
             }
             catch (Exception ex)
             {
-                await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "debug.txt"),
-                    $"[{DateTime.Now}][SubstituteValues] Exception: {ex.Message}\nStackTrace: {ex.StackTrace}\n");
-                return StatusCode(500, new CodeExecutionResponse
-                {
-                    IsSuccessful = false,
-                    Output = "",
-                    Error = $"Server error: {ex.Message}",
-                    Values = new List<TestVariableTracker.ValueData>(),
-                    Mismatches = new List<TestVariableTracker.MismatchData>(),
-                    ExecutionTime = 0
-                });
+                await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt", $"[{DateTime.Now}][SubstituteValues] Error: {ex.Message}\n");
+                return BadRequest($"Ошибка при обработке данных: {ex.Message}");
             }
+        }
+
+        // Классы для сериализации
+        public class ValueData
+        {
+            public int TrackerHitId { get; set; }
+            public int LineNumber { get; set; }
+            public string VariableName { get; set; }
+            public string Type { get; set; }
+            public int Rank { get; set; }
+            public string Value { get; set; }
+        }
+
+        public class MismatchData
+        {
+            public int TrackerHitId { get; set; }
+            public int LineNumber { get; set; }
+            public string VariableName { get; set; }
+            public string ExpectedValue { get; set; }
+            public string ActualValue { get; set; }
         }
 
 
@@ -1250,204 +1178,234 @@ namespace InterpretatorService.Controllers
         }
 
         [HttpPost("modify-test/{codeId}/{testId}")]
-        public async Task<IActionResult> ModifyTest(int codeId, int testId, IFormFile metadataFile)
+        public async Task<IActionResult> ModifyTest(int codeId, int testId, IFormFile trackerInsertLines)
         {
             try
             {
-                var testFilePath = System.IO.Path.Combine(StorageDirectory, $"test{codeId}_{testId}.cs");
-                if (!System.IO.File.Exists(testFilePath))
-                    return NotFound($"Test file test{codeId}_{testId}.cs not found.");
+                // Формируем пути к файлам
+                string sourceFilePath = $"/app/code_files/test{codeId}_{testId}.cs";
+                string modifiedFilePath = $"/app/code_files/test{codeId}_{testId}modified.cs";
+                string debugPath = "/app/code_files/debug.txt";
 
-                using var streamReader = new StreamReader(metadataFile.OpenReadStream());
-                var metadata = await streamReader.ReadToEndAsync();
-                var trackLines = metadata.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(line =>
-                    {
-                        var parts = line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length < 2 || !int.TryParse(parts[0], out int lineNum))
-                            return new TrackingPoint { LineNumber = 0, MethodId = 0, VariableNames = Array.Empty<string>() };
-
-                        int methodId = lineNum;
-                        if (parts.Length > 2 && int.TryParse(parts[1], out int parsedMethodId))
-                        {
-                            methodId = parsedMethodId;
-                            return new TrackingPoint
-                            {
-                                LineNumber = lineNum,
-                                MethodId = methodId,
-                                VariableNames = parts.Skip(2).ToArray()
-                            };
-                        }
-                        return new TrackingPoint
-                        {
-                            LineNumber = lineNum,
-                            MethodId = methodId,
-                            VariableNames = parts.Skip(1).ToArray()
-                        };
-                    })
-                    .Where(t => t.LineNumber > 0)
-                    .ToList();
-
-                var code = await System.IO.File.ReadAllTextAsync(testFilePath);
-                var lines = code.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).ToList();
-
-                var variableTypes = new Dictionary<string, string>();
-                for (int i = 0; i < lines.Count; i++)
+                // Проверяем существование исходного файла
+                if (!System.IO.File.Exists(sourceFilePath))
                 {
-                    var line = lines[i].Trim();
-                    if (line.Contains("=") && !line.StartsWith("//"))
+                    string error = $"Исходный файл {sourceFilePath} не найден.";
+                    await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Читаем исходный код
+                string[] sourceLines = await System.IO.File.ReadAllLinesAsync(sourceFilePath);
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Read source file: {sourceFilePath}, lines: {sourceLines.Length}\n");
+
+                // Читаем .txt файл с трекерами
+                if (trackerInsertLines == null || trackerInsertLines.Length == 0)
+                {
+                    string error = "Файл трекеров не предоставлен или пуст.";
+                    await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                var trackers = new List<(int LineNumber, string[] Variables)>();
+                using (var stream = trackerInsertLines.OpenReadStream())
+                using (var reader = new StreamReader(stream))
+                {
+                    string line;
+                    while ((line = await reader.ReadLineAsync()) != null)
                     {
-                        var parts = line.Split('=', StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length > 0)
+                        string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length >= 2 && int.TryParse(parts[0], out int lineNumber))
                         {
-                            var decl = parts[0].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                            if (decl.Length >= 2)
+                            string[] variables = parts.Skip(1).ToArray();
+                            trackers.Add((lineNumber, variables));
+                        }
+                    }
+                }
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Read trackers, count: {trackers.Count}\n");
+
+                // Сортируем трекеры по номеру строки
+                trackers.Sort((a, b) => a.LineNumber.CompareTo(b.LineNumber));
+
+                // Собираем библиотеки
+                var requiredUsings = new HashSet<string>
+            {
+                "using System;",
+                "using System.IO;",
+                "using System.Collections.Generic;",
+                "using System.Linq;"
+            };
+                var existingUsings = sourceLines
+                    .TakeWhile(line => line.Trim().StartsWith("using "))
+                    .Select(line => line.Trim())
+                    .ToHashSet();
+                var newUsings = requiredUsings.Except(existingUsings).ToList();
+
+                // Находим начало тела метода Main
+                int mainBodyStartLine = -1;
+                bool foundMainSignature = false;
+                for (int i = 0; i < sourceLines.Length; i++)
+                {
+                    string line = sourceLines[i].Trim();
+                    if (!foundMainSignature && line.Contains("static void Main"))
+                    {
+                        foundMainSignature = true;
+                    }
+                    if (foundMainSignature && line.Contains("{"))
+                    {
+                        mainBodyStartLine = i + 1;
+                        break;
+                    }
+                }
+
+                if (mainBodyStartLine == -1)
+                {
+                    string error = "Не удалось найти тело метода Main.";
+                    await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Error: {error}\n");
+                    return BadRequest(error);
+                }
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Found Main body start at line: {mainBodyStartLine}\n");
+
+                // Парсим объявления переменных
+                var variableTypes = ParseVariableTypes(sourceLines);
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Parsed variable types: {string.Join(", ", variableTypes.Select(kv => $"{kv.Key}:{kv.Value}"))}\n");
+
+                // Создаём новый список строк
+                var modifiedLines = new List<string>();
+                int addedLines = 0; // Счётчик добавленных строк (Initialize и трекеры)
+                bool[] trackerInserted = new bool[trackers.Count]; // Отслеживаем вставленные трекеры
+
+                // Добавляем библиотеки
+                modifiedLines.AddRange(newUsings);
+                if (newUsings.Any() && existingUsings.Any())
+                    modifiedLines.Add("");
+                modifiedLines.AddRange(sourceLines.TakeWhile(line => line.Trim().StartsWith("using ")));
+                int stepCounter = 0;
+                // Обрабатываем строки исходного кода
+                for (int currentLine = 0; currentLine < sourceLines.Length; currentLine++)
+                {
+                    // Пропускаем уже добавленные using
+                    if (sourceLines[currentLine].Trim().StartsWith("using "))
+                        continue;
+
+                    // Вставляем Initialize после начала тела Main
+                    if (currentLine == mainBodyStartLine - 1)
+                    {
+                        modifiedLines.Add(sourceLines[currentLine]); // Добавляем строку с {
+                        modifiedLines.Add($"    TestVariableTracker.Initialize(\"{codeId}_{testId}\", \"/app/code_files/{codeId}_{testId}_userdata.txt\");");
+                        addedLines++;
+                        await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Inserted Initialize at line: {modifiedLines.Count}\n");
+                        continue;
+                    }
+
+                    // Добавляем текущую строку
+                    modifiedLines.Add(sourceLines[currentLine]);
+                    
+                    // Проверяем, нужно ли вставить трекер после текущей строки
+                    for (int i = 0; i < trackers.Count; i++)
+                    {
+                        if (trackerInserted[i]) continue; // Пропускаем уже вставленные трекеры
+
+                        var (lineNumber, variables) = trackers[i];
+                        // Проверяем, является ли текущая строка целевой (с учётом сдвига от using и Initialize)
+                        int sourceLineNumber = currentLine + 1; // Номер строки в исходном файле (1-based)
+                        if (sourceLineNumber == lineNumber)
+                        {
+                            stepCounter++;
+                            string trackerVar = $"updates_{lineNumber}_{i}";
+                            string trackerCall = $"    var {trackerVar} = TestVariableTracker.TrackVariables({lineNumber}, {stepCounter}, {string.Join(", ", variables.Select(v => $"(\"{v}\", {v})"))});";
+                            modifiedLines.Add(trackerCall);
+                            foreach (string variable in variables)
                             {
-                                var type = decl[0];
-                                var name = decl[1].TrimEnd(';');
-                                variableTypes[name] = type;
+                                string typeCast = DetermineTypeCast(variable, variableTypes);
+                                modifiedLines.Add($"    if ({trackerVar}.ContainsKey(\"{variable}\")) {variable} = {typeCast}{trackerVar}[\"{variable}\"];");
                             }
-                        }
-                    }
-                    if (line.StartsWith("for") && line.Contains("int "))
-                    {
-                        var decl = line.Substring(line.IndexOf("int ") + 4).Split('=', StringSplitOptions.RemoveEmptyEntries);
-                        if (decl.Length > 0)
-                        {
-                            var name = decl[0].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)[0];
-                            variableTypes[name] = "int";
+                            addedLines += 1 + variables.Length; // 1 для TrackVariables, по 1 для каждого if
+                            trackerInserted[i] = true;
+                            await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Inserted tracker for line {lineNumber}, variables: {string.Join(", ", variables)}\n");
                         }
                     }
                 }
 
-                var controlStructures = new HashSet<string> { "for", "while", "if", "else", "switch", "do", "foreach", "try", "catch", "finally" };
-                var insertions = new List<(int InsertAfterLine, string TrackerLine)>();
-                int uniqueId = 0;
+                // Добавляем класс TestVariableTracker
+                modifiedLines.Add("");
+                modifiedLines.Add(TestVariableTracker.GetTrackerMethodCode($"{codeId}_{testId}"));
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Added TestVariableTracker class\n");
 
-                foreach (var point in trackLines.OrderByDescending(t => t.LineNumber))
-                {
-                    int lineNumber = point.LineNumber;
-                    int methodId = point.MethodId;
-                    string[] variables = point.VariableNames;
+                // Записываем в модифицированный файл
+                if (System.IO.File.Exists(modifiedFilePath))
+                    System.IO.File.Delete(modifiedFilePath);
+                await System.IO.File.WriteAllLinesAsync(modifiedFilePath, modifiedLines);
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Created modified file: {modifiedFilePath}, lines: {modifiedLines.Count}\n");
 
-                    if (lineNumber < 1 || lineNumber > lines.Count)
-                    {
-                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "logs.txt"),
-                            $"[{DateTime.Now}][ModifyTest] Invalid line number {lineNumber} for methodId {methodId}\n");
-                        continue;
-                    }
-
-                    int insertLine = lineNumber;
-                    string prevLine = lineNumber > 1 ? lines[lineNumber - 2].Trim() : "";
-                    string currentLine = lines[lineNumber - 1].Trim();
-                    string nextLine = lineNumber < lines.Count ? lines[lineNumber].Trim() : "";
-
-                    bool isControlStructure = controlStructures.Any(cs => prevLine.StartsWith(cs) || prevLine.Contains($"{cs} ") || currentLine.StartsWith(cs));
-                    bool hasOpeningBrace = nextLine.StartsWith("{") || currentLine.EndsWith("{");
-                    bool hasSemicolon = currentLine.EndsWith(";");
-
-                    if (isControlStructure && hasOpeningBrace)
-                    {
-                        // Ищем конец блока
-                        int braceCount = 1;
-                        insertLine = lineNumber + 1;
-                        while (insertLine < lines.Count && braceCount > 0)
-                        {
-                            var line = lines[insertLine - 1].Trim();
-                            braceCount += line.Count(c => c == '{') - line.Count(c => c == '}');
-                            insertLine++;
-                        }
-                        insertLine--; // Вставляем перед закрывающей скобкой
-                    }
-                    else if (isControlStructure && !hasOpeningBrace && !hasSemicolon)
-                    {
-                        // Ищем конец однострочного блока
-                        insertLine = lineNumber + 1;
-                        while (insertLine <= lines.Count && lines[insertLine - 1].Trim() == "")
-                            insertLine++;
-                    }
-                    else if (!hasSemicolon && !hasOpeningBrace)
-                    {
-                        // Пропускаем, если строка не завершена
-                        await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "logs.txt"),
-                            $"[{DateTime.Now}][ModifyTest] Skipping line {lineNumber} for methodId {methodId}: incomplete statement\n");
-                        continue;
-                    }
-
-                    if (insertLine <= lines.Count)
-                    {
-                        var trackArgs = string.Join(", ", variables.Select(v => $"(\"{v}\", {v})"));
-                        var indent = new string(' ', lines[lineNumber - 1].TakeWhile(char.IsWhiteSpace).Count());
-                        var updatesVar = $"updates_{methodId}_{uniqueId++}";
-                        var trackerLine = $"{indent}var {updatesVar} = await TestVariableTracker.TrackVariables({methodId}, {lineNumber}, {trackArgs});";
-
-                        var updateLines = variables.Select(v =>
-                        {
-                            string type = variableTypes.ContainsKey(v) ? variableTypes[v] : "object";
-                            string castType = type switch
-                            {
-                                "int[]" => "(int[])",
-                                "float[]" => "(float[])",
-                                "double[]" => "(double[])",
-                                "int[,]" => "(int[,])",
-                                "float[,]" => "(float[,])",
-                                "double[,]" => "(double[,])",
-                                "int" => "(int)",
-                                "float" => "(float)",
-                                "double" => "(double)",
-                                "char" => "(char)",
-                                "string" => "(string)",
-                                _ => ""
-                            };
-                            return $"{indent}if ({updatesVar}.ContainsKey(\"{v}\")) {v} = {castType}{updatesVar}[\"{v}\"];";
-                        }).ToList();
-
-                        insertions.Add((insertLine, string.Join("\n", new[] { trackerLine }.Concat(updateLines))));
-                    }
-                }
-
-                foreach (var (insertLine, trackerLine) in insertions.OrderByDescending(x => x.InsertAfterLine))
-                {
-                    lines.InsertRange(insertLine, trackerLine.Split('\n'));
-                }
-
-                var usings = new List<string>();
-                if (!code.Contains("using System.Linq;"))
-                    usings.Add("using System.Linq;");
-                if (!code.Contains("using System.IO;"))
-                    usings.Add("using System.IO;");
-                if (!code.Contains("using System.Collections.Generic;"))
-                    usings.Add("using System.Collections.Generic;");
-                if (!code.Contains("using System.Threading.Tasks;"))
-                    usings.Add("using System.Threading.Tasks;");
-
-                if (usings.Any())
-                {
-                    int insertIndex = lines.FindIndex(l => !l.Trim().StartsWith("using "));
-                    lines.InsertRange(insertIndex, usings);
-                }
-
-                var trackerCode = TestVariableTracker.GetTrackerMethodCode($"{codeId}_{testId}");
-                var trackerLines = trackerCode.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
-                    .Where(line => !line.Trim().StartsWith("using "))
-                    .ToList();
-                lines.Add("\n");
-                lines.AddRange(trackerLines);
-
-                var modifiedFilePath = System.IO.Path.Combine(StorageDirectory, $"test{codeId}_{testId}_modified.cs");
-                await System.IO.File.WriteAllTextAsync(modifiedFilePath, string.Join("\n", lines));
-
-                return Ok("Test file modified successfully.");
+                return Ok();
             }
             catch (Exception ex)
             {
-                await System.IO.File.AppendAllTextAsync(System.IO.Path.Combine(StorageDirectory, "logs.txt"),
-                    $"[{DateTime.Now}][ModifyTest] Exception: {ex.Message}\nStackTrace: {ex.StackTrace}\n");
-                return StatusCode(500, $"Server error: {ex.Message}");
+                await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt", $"[{DateTime.Now}][ModifyTest] Error: {ex.Message}\n");
+                return BadRequest($"Ошибка при модификации кода: {ex.Message}");
             }
         }
 
+        private static Dictionary<string, string> ParseVariableTypes(string[] sourceLines)
+        {
+            var variableTypes = new Dictionary<string, string>();
+            // Регулярное выражение для поиска объявлений переменных
+            string pattern = @"^\s*(int|float|double|char|string)(\[\]|,\]\])?\s+([a-zA-Z_]\w*)\s*(=.*)?;";
 
+            foreach (string line in sourceLines)
+            {
+                string trimmed = line.Trim();
+                Match match = Regex.Match(trimmed, pattern);
+                if (match.Success)
+                {
+                    string type = match.Groups[1].Value; // int, float, double, char, string
+                    string arraySpec = match.Groups[2].Value; // [], [,] или пусто
+                    string variableName = match.Groups[3].Value; // имя переменной
+
+                    string fullType;
+                    if (arraySpec == "[]")
+                        fullType = $"{type}[]";
+                    else if (arraySpec == "[,]")
+                        fullType = $"{type}[,]";
+                    else
+                        fullType = type;
+
+                    variableTypes[variableName] = fullType;
+                }
+            }
+
+            return variableTypes;
+        }
+
+        private static string DetermineTypeCast(string variableName, Dictionary<string, string> variableTypes)
+        {
+            if (variableTypes.TryGetValue(variableName, out string type))
+            {
+                switch (type)
+                {
+                    case "int": return "(int)";
+                    case "float": return "(float)";
+                    case "double": return "(double)";
+                    case "char": return "(char)";
+                    case "string": return "(string)";
+                    case "int[]": return "(int[])";
+                    case "float[]": return "(float[])";
+                    case "double[]": return "(double[])";
+                    case "int[,]": return "(int[,])";
+                    case "float[,]": return "(float[,])";
+                    case "double[,]": return "(double[,])";
+                    default:
+                        System.IO.File.AppendAllText("/app/code_files/debug.txt",
+                            $"[{DateTime.Now}][ModifyTest] Warning: Unknown type {type} for variable {variableName}, using (int)\n");
+                        return "(int)";
+                }
+            }
+
+            System.IO.File.AppendAllText("/app/code_files/debug.txt",
+                $"[{DateTime.Now}][ModifyTest] Warning: Type not found for variable {variableName}, using (int)\n");
+            return "(int)"; // По умолчанию
+        }
 
         private string ModifyCode(string code, List<(int LineNumber, string[] VariableNames)> trackLines, int codeId)
         {

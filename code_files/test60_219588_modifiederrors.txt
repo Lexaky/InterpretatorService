@@ -1,0 +1,41 @@
+; expected
+Identifier expected
+Type expected
+Identifier expected
+Type expected
+Identifier expected
+Syntax error, ',' expected
+Invalid token '{' in class, record, struct, or interface member declaration
+Invalid token 'foreach' in class, record, struct, or interface member declaration
+Tuple must contain at least two elements.
+) expected
+Invalid token 'in' in class, record, struct, or interface member declaration
+Invalid token ')' in class, record, struct, or interface member declaration
+Invalid token ')' in class, record, struct, or interface member declaration
+Invalid token '+=' in class, record, struct, or interface member declaration
+Invalid token '+=' in class, record, struct, or interface member declaration
+Invalid token ';' in class, record, struct, or interface member declaration
+Invalid token ';' in class, record, struct, or interface member declaration
+Invalid token 'if' in class, record, struct, or interface member declaration
+Tuple must contain at least two elements.
+) expected
+Type expected
+Tuple must contain at least two elements.
+) expected
+Invalid token '"sum"' in class, record, struct, or interface member declaration
+Invalid token '=' in class, record, struct, or interface member declaration
+Invalid token '=' in class, record, struct, or interface member declaration
+Invalid token ';' in class, record, struct, or interface member declaration
+Invalid token ';' in class, record, struct, or interface member declaration
+Top-level statements must precede namespace and type declarations.
+Type or namespace definition, or end-of-file expected
+Type or namespace definition, or end-of-file expected
+Missing partial modifier on declaration of type 'Program'; another partial declaration of this type exists
+'Program.Main(string[])' must declare a body because it is not marked abstract, extern, or partial
+The type or namespace name 'await' could not be found (are you missing a using directive or an assembly reference?)
+'TestVariableTracker' in explicit interface declaration is not an interface
+'Program.Initialize(?, ?)' must declare a body because it is not marked abstract, extern, or partial
+The contextual keyword 'var' may only appear within a local variable declaration or in script code
+A field initializer cannot reference the non-static field, method, or property 'Program.sum'
+The 'await' operator can only be used when contained within a method or lambda expression marked with the 'async' modifier
+An object reference is required for the non-static field, method, or property 'Program.sum'

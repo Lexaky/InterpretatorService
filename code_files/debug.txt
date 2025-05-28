@@ -1324,3 +1324,185 @@
 12//12//sum//41//5
 [05/25/2025 06:06:21][SubstituteValues] Response: IsSuccessful=True, ValuesCount=3, MismatchesCount=3, Error=, ExecutionTime=0
 [05/25/2025 06:06:21][SubstituteValues] Temporary files preserved: /app/code_files/temp_54_147498.cs, /app/code_files/54_147498values.txt, /app/code_files/54_147498mismatches.txt
+[05/28/2025 06:55:55][SubstituteValues] User data file content:
+53 405814
+12 sum 5
+12 sum 15
+12 sum 31
+[05/28/2025 06:55:55][SubstituteValues] Created/Cleared values file: /app/code_files/68_189720values.txt
+[05/28/2025 06:55:55][SubstituteValues] Created/Cleared mismatches file: /app/code_files/68_189720mismatches.txt
+[05/28/2025 06:55:55][SubstituteValues] Inserted Initialize call at line 11
+[05/28/2025 06:55:55][SubstituteValues] Temporary file created: /app/code_files/temp_68_189720.cs
+[05/28/2025 06:55:57][TestVariableTracker] Initialized: codeId=68_189720, userDataPath=/app/code_files/68_189720_userdata.txt
+[05/28/2025 06:55:57][TestVariableTracker] Initialized: codeId=68_189720, userDataPath=/app/codeData/68_189720_userdata.txt
+[05/28/2025 06:55:57][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/28/2025 06:55:57][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/codeData/68_189720_userdata.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.AsyncStreamReader(String path, Encoding encoding)
+   at System.IO.File.InternalReadAllLinesAsync(String path, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/28/2025 06:55:57][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/28/2025 06:55:57][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/codeData/68_189720_userdata.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.AsyncStreamReader(String path, Encoding encoding)
+   at System.IO.File.InternalReadAllLinesAsync(String path, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/28/2025 06:55:57][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/28/2025 06:55:57][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/codeData/68_189720_userdata.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.AsyncStreamReader(String path, Encoding encoding)
+   at System.IO.File.InternalReadAllLinesAsync(String path, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/28/2025 06:55:57][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 45
+, ErrorOutput=
+[05/28/2025 06:55:57][SubstituteValues] Read values TXT: 0 items
+
+[05/28/2025 06:55:57][SubstituteValues] Read mismatches TXT: 0 items
+
+[05/28/2025 06:55:57][SubstituteValues] Response: IsSuccessful=True, ValuesCount=0, MismatchesCount=0, Error=, ExecutionTime=0
+[05/28/2025 06:55:57][SubstituteValues] Temporary files preserved: /app/code_files/temp_68_189720.cs, /app/code_files/68_189720values.txt, /app/code_files/68_189720mismatches.txt
+[05/28/2025 07:04:35][SubstituteValues] User data file content:
+53 405814
+12 sum 5
+12 sum 15
+12 sum 31
+[05/28/2025 07:04:35][SubstituteValues] Created/Cleared values file: /app/code_files/68_189720values.txt
+[05/28/2025 07:04:35][SubstituteValues] Created/Cleared mismatches file: /app/code_files/68_189720mismatches.txt
+[05/28/2025 07:04:35][SubstituteValues] Inserted Initialize call at line 11
+[05/28/2025 07:04:35][SubstituteValues] Temporary file created: /app/code_files/temp_68_189720.cs
+[05/28/2025 07:04:37][TestVariableTracker] Initialized: codeId=68_189720, userDataPath=/app/code_files/68_189720_userdata.txt
+[05/28/2025 07:04:37][TestVariableTracker] Initialized: codeId=68_189720, userDataPath=/app/codeData/68_189720_userdata.txt
+[05/28/2025 07:04:37][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/28/2025 07:04:37][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/codeData/68_189720_userdata.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.AsyncStreamReader(String path, Encoding encoding)
+   at System.IO.File.InternalReadAllLinesAsync(String path, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/28/2025 07:04:37][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/28/2025 07:04:37][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/codeData/68_189720_userdata.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.AsyncStreamReader(String path, Encoding encoding)
+   at System.IO.File.InternalReadAllLinesAsync(String path, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/28/2025 07:04:37][TrackVariables] Started: methodId=12, lineNumber=12, variables=sum
+[05/28/2025 07:04:38][TrackVariables] Error: methodId=12, lineNumber=12, message=Could not find a part of the path '/app/codeData/68_189720_userdata.txt'., stackTrace=   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.AsyncStreamReader(String path, Encoding encoding)
+   at System.IO.File.InternalReadAllLinesAsync(String path, Encoding encoding, CancellationToken cancellationToken)
+   at TestVariableTracker.TrackVariables(Int32 methodId, Int32 lineNumber, ValueTuple`2[] variables)
+[05/28/2025 07:04:38][SubstituteValues] Execution completed: IsSuccessful=True, StandardOutput=Сумма: 45
+, ErrorOutput=
+[05/28/2025 07:04:38][SubstituteValues] Read values TXT: 0 items
+
+[05/28/2025 07:04:38][SubstituteValues] Read mismatches TXT: 0 items
+
+[05/28/2025 07:04:38][SubstituteValues] Response: IsSuccessful=True, ValuesCount=0, MismatchesCount=0, Error=, ExecutionTime=0
+[05/28/2025 07:04:38][SubstituteValues] Temporary files preserved: /app/code_files/temp_68_189720.cs, /app/code_files/68_189720values.txt, /app/code_files/68_189720mismatches.txt
+[05/28/2025 08:41:20][ModifyTest] Read source file: /app/code_files/test69_462907.cs, lines: 17
+[05/28/2025 08:41:20][ModifyTest] Read trackers, count: 1
+[05/28/2025 08:41:20][ModifyTest] Found Main body start at line: 6
+[05/28/2025 08:41:20][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 08:41:20][ModifyTest] Inserted Initialize at line: 12
+[05/28/2025 08:41:20][ModifyTest] Inserted tracker for line 12 (adjusted: 12), variables: sum
+[05/28/2025 08:41:20][ModifyTest] Inserted tracker for line 12 (adjusted: 14), variables: sum
+[05/28/2025 08:41:20][ModifyTest] Inserted tracker for line 12 (adjusted: 16), variables: sum
+[05/28/2025 08:41:20][ModifyTest] Added TestVariableTracker class
+[05/28/2025 08:41:20][ModifyTest] Created modified file: /app/code_files/test69_462907modified.cs, lines: 30
+[05/28/2025 08:51:54][ModifyTest] Read source file: /app/code_files/test69_462907.cs, lines: 17
+[05/28/2025 08:51:54][ModifyTest] Read trackers, count: 1
+[05/28/2025 08:51:54][ModifyTest] Found Main body start at line: 6
+[05/28/2025 08:51:54][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 08:51:54][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 08:51:54][ModifyTest] Inserted tracker for line 12 (adjusted: 12), variables: sum
+[05/28/2025 08:51:54][ModifyTest] Added TestVariableTracker class
+[05/28/2025 08:51:54][ModifyTest] Created modified file: /app/code_files/test69_462907modified.cs, lines: 26
+[05/28/2025 08:58:14][ModifyTest] Read source file: /app/code_files/test69_462907.cs, lines: 17
+[05/28/2025 08:58:14][ModifyTest] Read trackers, count: 1
+[05/28/2025 08:58:14][ModifyTest] Found Main body start at line: 6
+[05/28/2025 08:58:14][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 08:58:14][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 08:58:14][ModifyTest] Inserted tracker for line 12, variables: sum
+[05/28/2025 08:58:14][ModifyTest] Added TestVariableTracker class
+[05/28/2025 08:58:14][ModifyTest] Created modified file: /app/code_files/test69_462907modified.cs, lines: 26
+[05/28/2025 09:04:50][ModifyTest] Read source file: /app/code_files/test70_815380.cs, lines: 17
+[05/28/2025 09:04:50][ModifyTest] Read trackers, count: 2
+[05/28/2025 09:04:50][ModifyTest] Found Main body start at line: 6
+[05/28/2025 09:04:50][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 09:04:50][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 09:04:50][ModifyTest] Inserted tracker for line 12, variables: numbers, sum
+[05/28/2025 09:04:50][ModifyTest] Inserted tracker for line 14, variables: sum
+[05/28/2025 09:04:50][ModifyTest] Added TestVariableTracker class
+[05/28/2025 09:04:50][ModifyTest] Created modified file: /app/code_files/test70_815380modified.cs, lines: 29
+[05/28/2025 09:06:27][ModifyTest] Read source file: /app/code_files/test70_815380.cs, lines: 17
+[05/28/2025 09:06:27][ModifyTest] Read trackers, count: 2
+[05/28/2025 09:06:27][ModifyTest] Found Main body start at line: 6
+[05/28/2025 09:06:27][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 09:06:28][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 09:06:28][ModifyTest] Inserted tracker for line 12, variables: numbers, sum
+[05/28/2025 09:06:28][ModifyTest] Inserted tracker for line 14, variables: sum
+[05/28/2025 09:06:28][ModifyTest] Added TestVariableTracker class
+[05/28/2025 09:06:28][ModifyTest] Created modified file: /app/code_files/test70_815380modified.cs, lines: 29
+[05/28/2025 09:25:07][ModifyTest] Read source file: /app/code_files/test71_872344.cs, lines: 17
+[05/28/2025 09:25:07][ModifyTest] Read trackers, count: 1
+[05/28/2025 09:25:07][ModifyTest] Found Main body start at line: 6
+[05/28/2025 09:25:07][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 09:25:07][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 09:25:07][ModifyTest] Inserted tracker for line 12, variables: sum
+[05/28/2025 09:25:07][ModifyTest] Added TestVariableTracker class
+[05/28/2025 09:25:07][ModifyTest] Created modified file: /app/code_files/test71_872344modified.cs, lines: 26
+[05/28/2025 09:25:18][SubstituteValues] Saved user data to /app/code_files/71_872344_userdata.txt
+[05/28/2025 09:25:19][SubstituteValues] Created/cleared /app/code_files/71_872344values.txt and /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:25:21][TestVariableTracker] Initialized: codeId=71_872344, userDataPath=/app/code_files/71_872344_userdata.txt
+[05/28/2025 09:25:21][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:25:21][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 09:25:21][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:25:21][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:25:21][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 09:25:21][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:25:21][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:25:21][TrackVariables] User values for step=3, methodId=12: sum=45
+[05/28/2025 09:25:21][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:25:21][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:25:21][TrackVariables] User values for step=4, methodId=12: 
+[05/28/2025 09:25:21][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:25:21][SubstituteValues] Code executed: /app/code_files/test71_872344modified.cs, IsSuccessful=True, StandardOutput=Сумма: 70\n, ErrorOutput=, WarningOutput=
+[05/28/2025 09:25:21][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt
+[05/28/2025 09:25:21][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:25:21][SubstituteValues] Generated JSON response
+[05/28/2025 09:26:03][SubstituteValues] Saved user data to /app/code_files/71_872344_userdata.txt
+[05/28/2025 09:26:03][SubstituteValues] Created/cleared /app/code_files/71_872344values.txt and /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:26:04][TestVariableTracker] Initialized: codeId=71_872344, userDataPath=/app/code_files/71_872344_userdata.txt
+[05/28/2025 09:26:04][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:26:04][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 09:26:04][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:26:04][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:26:04][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 09:26:04][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:26:04][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:26:04][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 09:26:04][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:26:04][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:26:04][TrackVariables] User values for step=4, methodId=12: sum=71
+[05/28/2025 09:26:04][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:26:04][SubstituteValues] Code executed: /app/code_files/test71_872344modified.cs, IsSuccessful=True, StandardOutput=Сумма: 71\n, ErrorOutput=, WarningOutput=
+[05/28/2025 09:26:04][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt
+[05/28/2025 09:26:04][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:26:04][SubstituteValues] Generated JSON response
