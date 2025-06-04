@@ -19,6 +19,7 @@ using Npgsql.Internal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace InterpretatorService.Controllers
 {
@@ -1032,6 +1033,30 @@ namespace InterpretatorService.Controllers
                     return BadRequest(error);
                 }
 
+                // Читаем userDataFile для анализа шагов
+                var userStepsData = new List<(int Step, int MethodId, string VariableName, string Value)>();
+                using (var memoryStream = new MemoryStream())
+                {
+                    await userDataFile.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+                    using (var reader = new StreamReader(memoryStream))
+                    {
+                        string line;
+                        while ((line = await reader.ReadLineAsync()) != null)
+                        {
+                            var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length >= 4 &&
+                                int.TryParse(parts[0], out int step) &&
+                                int.TryParse(parts[1], out int methodId))
+                            {
+                                userStepsData.Add((step, methodId, parts[2], parts[3]));
+                            }
+                        }
+                    }
+                }
+                var userSteps = userStepsData.Select(x => x.Step).Distinct().ToList();
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Read {userStepsData.Count} user data entries, {userSteps.Count} unique steps\n");
+
                 // Сохраняем пользовательский файл
                 using (var stream = new FileStream(userDataPath, FileMode.Create, FileAccess.Write))
                 {
@@ -1043,8 +1068,9 @@ namespace InterpretatorService.Controllers
                 System.IO.File.WriteAllText(valuesPath, string.Empty);
                 System.IO.File.WriteAllText(mismatchesPath, string.Empty);
                 await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Created/cleared {valuesPath} and {mismatchesPath}\n");
-                InterpreterService interpreterService = new InterpreterService();
+
                 // Выполняем модифицированный код с ограничением по времени (15 секунд)
+                InterpreterService interpreterService = new InterpreterService();
                 var executionTask = interpreterService.ExecuteCodeAsync(modifiedCodePath);
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(15));
                 var completedTask = await Task.WhenAny(executionTask, timeoutTask);
@@ -1074,7 +1100,7 @@ namespace InterpretatorService.Controllers
 
                 // Читаем файлы values.txt и mismatches.txt
                 var values = new List<ValueData>();
-                var mismatches = new List<MismatchData>();
+                var programSteps = new List<int>();
 
                 // Чтение values.txt
                 if (System.IO.File.Exists(valuesPath))
@@ -1085,53 +1111,127 @@ namespace InterpretatorService.Controllers
                         var parts = line.Split("//", StringSplitOptions.None);
                         if (parts.Length >= 6 &&
                             int.TryParse(parts[0], out int step) &&
-                            int.TryParse(parts[1], out int trackerHitId) &&
-                            int.TryParse(parts[4], out int rank))
+                            int.TryParse(parts[4], out int rank) &&
+                            int.TryParse(parts[1], out int trackerHitId))
                         {
-                            values.Add(new ValueData
+                            var valueData = new ValueData
                             {
+                                Step = step,
                                 TrackerHitId = trackerHitId,
-                                LineNumber = trackerHitId, // methodId соответствует номеру строки
                                 VariableName = parts[2],
                                 Type = parts[3],
                                 Rank = rank,
                                 Value = parts[5]
-                            });
+                            };
+                            values.Add(valueData);
+                            programSteps.Add(step);
+                        }
+                        else
+                        {
+                            await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Invalid value line format: {line}\n");
                         }
                     }
                 }
-                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Read {values.Count} values from {valuesPath}\n");
+                programSteps = programSteps.Distinct().ToList();
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Read {values.Count} values from {valuesPath}, {programSteps.Count} unique steps\n");
 
                 // Чтение mismatches.txt
+                var mismatches = new List<MismatchData>();
+                int mismatch5PartsCount = 0;
+                int mismatch6PartsCount = 0;
+
                 if (System.IO.File.Exists(mismatchesPath))
                 {
                     string[] mismatchLines = await System.IO.File.ReadAllLinesAsync(mismatchesPath);
                     foreach (var line in mismatchLines)
                     {
                         var parts = line.Split("//", StringSplitOptions.None);
-                        if (parts.Length >= 5 &&
+                        if (parts.Length == 5 &&
                             int.TryParse(parts[0], out int step) &&
-                            int.TryParse(parts[1], out int trackerHitId) &&
-                            int.TryParse(parts[2], out int lineNumber))
+                            int.TryParse(parts[1], out int lineNumber) &&
+                            int.TryParse(parts[2], out int trackerNumber))
                         {
                             mismatches.Add(new MismatchData
                             {
-                                TrackerHitId = trackerHitId,
+                                Step = step,
                                 LineNumber = lineNumber,
+                                TrackerNumber = trackerNumber,
                                 VariableName = parts[3],
-                                ExpectedValue = parts.Length > 5 ? parts[4] : null,
-                                ActualValue = parts.Length > 5 ? parts[5] : parts[4] // Сообщение как ActualValue
+                                ExpectedValue = null,
+                                ActualValue = parts[4]
                             });
+                            mismatch5PartsCount++;
+                        }
+                        else if (parts.Length == 6 &&
+                                 int.TryParse(parts[0], out step) &&
+                                 int.TryParse(parts[1], out lineNumber) &&
+                                 int.TryParse(parts[2], out trackerNumber))
+                        {
+                            mismatches.Add(new MismatchData
+                            {
+                                Step = step,
+                                LineNumber = lineNumber,
+                                TrackerNumber = trackerNumber,
+                                VariableName = parts[3],
+                                ExpectedValue = parts[4],
+                                ActualValue = parts[5]
+                            });
+                            mismatch6PartsCount++;
+                        }
+                        else
+                        {
+                            await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Invalid mismatch line format: {line}\n");
                         }
                     }
                 }
-                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Read {mismatches.Count} mismatches from {mismatchesPath}\n");
+                await System.IO.File.AppendAllTextAsync(debugPath,
+                    $"[{DateTime.Now}][SubstituteValues] Read {mismatches.Count} mismatches from {mismatchesPath} " +
+                    $"({mismatch5PartsCount} with 5 parts, {mismatch6PartsCount} with 6 parts)\n");
+
+                // Анализируем шаги
+                var missingProgramSteps = programSteps.Except(userSteps).ToList();
+                var missingUserSteps = userSteps.Except(programSteps).ToList();
+
+                var programStepsData = values
+                    .Where(v => missingProgramSteps.Contains(v.Step))
+                    .ToList();
+
+                var userStepsDataFiltered = userStepsData
+                    .Where(u => missingUserSteps.Contains(u.Step))
+                    .Select(u => new UserStepData
+                    {
+                        Step = u.Step,
+                        MethodId = u.MethodId,
+                        VariableName = u.VariableName,
+                        Value = u.Value
+                    })
+                    .ToList();
+
+                // Формируем метаинформацию
+                var meta = new
+                {
+                    userSteps = userStepsDataFiltered,
+                    programSteps = programStepsData
+                };
 
                 // Сериализуем данные в JSON
                 var response = new
                 {
+                    CodeModel = new
+                    {
+                        executionResult.CodeId,
+                        executionResult.Path,
+                        executionResult.StandardOutput,
+                        executionResult.ErrorOutput,
+                        executionResult.WarningOutput,
+                        executionResult.OutputFilePath,
+                        executionResult.ErrorFilePath,
+                        executionResult.WarningFilePath,
+                        executionResult.IsSuccessful
+                    },
                     Values = values,
-                    Mismatches = mismatches
+                    Mismatches = mismatches,
+                    Meta = meta
                 };
                 string jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
 
@@ -1150,8 +1250,8 @@ namespace InterpretatorService.Controllers
         // Классы для сериализации
         public class ValueData
         {
+            public int Step { get; set; }
             public int TrackerHitId { get; set; }
-            public int LineNumber { get; set; }
             public string VariableName { get; set; }
             public string Type { get; set; }
             public int Rank { get; set; }
@@ -1160,11 +1260,20 @@ namespace InterpretatorService.Controllers
 
         public class MismatchData
         {
-            public int TrackerHitId { get; set; }
+            public int Step { get; set; }
             public int LineNumber { get; set; }
+            public int TrackerNumber { get; set; }
             public string VariableName { get; set; }
             public string ExpectedValue { get; set; }
             public string ActualValue { get; set; }
+        }
+
+        public class UserStepData
+        {
+            public int Step { get; set; }
+            public int MethodId { get; set; }
+            public string VariableName { get; set; }
+            public string Value { get; set; }
         }
 
 

@@ -1506,3 +1506,344 @@
 [05/28/2025 09:26:04][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt
 [05/28/2025 09:26:04][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt
 [05/28/2025 09:26:04][SubstituteValues] Generated JSON response
+[05/28/2025 09:29:25][SubstituteValues] Saved user data to /app/code_files/71_872344_userdata.txt
+[05/28/2025 09:29:25][SubstituteValues] Created/cleared /app/code_files/71_872344values.txt and /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:29:27][TestVariableTracker] Initialized: codeId=71_872344, userDataPath=/app/code_files/71_872344_userdata.txt
+[05/28/2025 09:29:27][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:29:27][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 09:29:27][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:29:27][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:29:27][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 09:29:27][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:29:27][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:29:27][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 09:29:27][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:29:27][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:29:27][TrackVariables] User values for step=4, methodId=12: 
+[05/28/2025 09:29:27][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:29:27][SubstituteValues] Code executed: /app/code_files/test71_872344modified.cs, IsSuccessful=True, StandardOutput=Сумма: 71\n, ErrorOutput=, WarningOutput=
+[05/28/2025 09:29:27][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt
+[05/28/2025 09:29:27][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:29:27][SubstituteValues] Generated JSON response
+[05/28/2025 09:37:48][SubstituteValues] Read 3 user data entries, 3 unique steps
+[05/28/2025 09:37:48][SubstituteValues] Saved user data to /app/code_files/71_872344_userdata.txt
+[05/28/2025 09:37:48][SubstituteValues] Created/cleared /app/code_files/71_872344values.txt and /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:37:51][TestVariableTracker] Initialized: codeId=71_872344, userDataPath=/app/code_files/71_872344_userdata.txt
+[05/28/2025 09:37:51][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:37:51][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 09:37:51][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:37:51][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:37:51][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 09:37:51][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:37:51][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:37:51][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 09:37:51][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:37:51][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:37:51][TrackVariables] User values for step=4, methodId=12: 
+[05/28/2025 09:37:51][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:37:51][SubstituteValues] Code executed: /app/code_files/test71_872344modified.cs, IsSuccessful=True, StandardOutput=Сумма: 71\n, ErrorOutput=, WarningOutput=
+[05/28/2025 09:37:51][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt, 4 unique steps
+[05/28/2025 09:37:51][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:37:51][SubstituteValues] Generated JSON response
+[05/28/2025 09:47:21][SubstituteValues] Read 3 user data entries, 3 unique steps
+[05/28/2025 09:47:21][SubstituteValues] Saved user data to /app/code_files/71_872344_userdata.txt
+[05/28/2025 09:47:21][SubstituteValues] Created/cleared /app/code_files/71_872344values.txt and /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:47:23][TestVariableTracker] Initialized: codeId=71_872344, userDataPath=/app/code_files/71_872344_userdata.txt
+[05/28/2025 09:47:23][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:47:23][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 09:47:23][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:47:23][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:47:23][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 09:47:23][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:47:23][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:47:23][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 09:47:23][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:47:23][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:47:23][TrackVariables] User values for step=4, methodId=12: 
+[05/28/2025 09:47:23][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:47:23][SubstituteValues] Code executed: /app/code_files/test71_872344modified.cs, IsSuccessful=True, StandardOutput=Сумма: 71\n, ErrorOutput=, WarningOutput=
+[05/28/2025 09:47:23][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt, 4 unique steps
+[05/28/2025 09:47:23][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt (0 with 5 parts, 1 with 6 parts)
+[05/28/2025 09:47:23][SubstituteValues] Generated JSON response
+[05/28/2025 09:52:56][SubstituteValues] Read 3 user data entries, 3 unique steps
+[05/28/2025 09:52:56][SubstituteValues] Saved user data to /app/code_files/71_872344_userdata.txt
+[05/28/2025 09:52:56][SubstituteValues] Created/cleared /app/code_files/71_872344values.txt and /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:52:59][TestVariableTracker] Initialized: codeId=71_872344, userDataPath=/app/code_files/71_872344_userdata.txt
+[05/28/2025 09:52:59][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:52:59][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 09:52:59][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:52:59][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:52:59][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 09:52:59][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:52:59][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:52:59][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 09:52:59][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:52:59][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:52:59][TrackVariables] User values for step=4, methodId=12: 
+[05/28/2025 09:52:59][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:52:59][SubstituteValues] Code executed: /app/code_files/test71_872344modified.cs, IsSuccessful=True, StandardOutput=Сумма: 71\n, ErrorOutput=, WarningOutput=
+[05/28/2025 09:52:59][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt, 4 unique steps
+[05/28/2025 09:52:59][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt (0 with 5 parts, 1 with 6 parts)
+[05/28/2025 09:52:59][SubstituteValues] Generated JSON response
+[05/28/2025 09:55:38][SubstituteValues] Read 3 user data entries, 3 unique steps
+[05/28/2025 09:55:38][SubstituteValues] Saved user data to /app/code_files/71_872344_userdata.txt
+[05/28/2025 09:55:38][SubstituteValues] Created/cleared /app/code_files/71_872344values.txt and /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:55:40][TestVariableTracker] Initialized: codeId=71_872344, userDataPath=/app/code_files/71_872344_userdata.txt
+[05/28/2025 09:55:40][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:55:40][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 09:55:40][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:55:40][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:55:40][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 09:55:40][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:55:40][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:55:40][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 09:55:40][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:55:40][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:55:40][TrackVariables] User values for step=4, methodId=12: 
+[05/28/2025 09:55:40][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:55:40][SubstituteValues] Code executed: /app/code_files/test71_872344modified.cs, IsSuccessful=True, StandardOutput=Сумма: 71\n, ErrorOutput=, WarningOutput=
+[05/28/2025 09:55:40][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt, 4 unique steps
+[05/28/2025 09:55:40][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt (0 with 5 parts, 1 with 6 parts)
+[05/28/2025 09:55:41][SubstituteValues] Generated JSON response
+[05/28/2025 09:57:23][SubstituteValues] Read 3 user data entries, 3 unique steps
+[05/28/2025 09:57:23][SubstituteValues] Saved user data to /app/code_files/71_872344_userdata.txt
+[05/28/2025 09:57:23][SubstituteValues] Created/cleared /app/code_files/71_872344values.txt and /app/code_files/71_872344mismatches.txt
+[05/28/2025 09:57:26][TestVariableTracker] Initialized: codeId=71_872344, userDataPath=/app/code_files/71_872344_userdata.txt
+[05/28/2025 09:57:26][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:57:26][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 09:57:26][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:57:26][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:57:26][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 09:57:26][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:57:26][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:57:26][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 09:57:26][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:57:26][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 09:57:26][TrackVariables] User values for step=4, methodId=12: 
+[05/28/2025 09:57:26][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/71_872344values.txt, mismatchesPath=/app/code_files/71_872344mismatches.txt
+[05/28/2025 09:57:26][SubstituteValues] Code executed: /app/code_files/test71_872344modified.cs, IsSuccessful=True, StandardOutput=Сумма: 71\n, ErrorOutput=, WarningOutput=
+[05/28/2025 09:57:26][SubstituteValues] Read 4 values from /app/code_files/71_872344values.txt, 4 unique steps
+[05/28/2025 09:57:26][SubstituteValues] Read 1 mismatches from /app/code_files/71_872344mismatches.txt (0 with 5 parts, 1 with 6 parts)
+[05/28/2025 09:57:26][SubstituteValues] Generated JSON response
+[05/28/2025 10:39:25][ModifyTest] Read source file: /app/code_files/test72_872727.cs, lines: 25
+[05/28/2025 10:39:25][ModifyTest] Read trackers, count: 3
+[05/28/2025 10:39:25][ModifyTest] Found Main body start at line: 6
+[05/28/2025 10:39:25][ModifyTest] Parsed variable types: arr:int[], temp:int
+[05/28/2025 10:39:25][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 10:39:25][ModifyTest] Warning: Type not found for variable j, using (int)
+[05/28/2025 10:39:25][ModifyTest] Warning: Type not found for variable i, using (int)
+[05/28/2025 10:39:25][ModifyTest] Inserted tracker for line 19, variables: arr, j, i
+[05/28/2025 10:39:25][ModifyTest] Warning: Type not found for variable i, using (int)
+[05/28/2025 10:39:25][ModifyTest] Inserted tracker for line 20, variables: arr, i
+[05/28/2025 10:39:25][ModifyTest] Inserted tracker for line 21, variables: arr
+[05/28/2025 10:39:25][ModifyTest] Added TestVariableTracker class
+[05/28/2025 10:39:25][ModifyTest] Created modified file: /app/code_files/test72_872727modified.cs, lines: 41
+[05/28/2025 10:40:12][SubstituteValues] Read 0 user data entries, 0 unique steps
+[05/28/2025 10:40:13][SubstituteValues] Saved user data to /app/code_files/72_872727_userdata.txt
+[05/28/2025 10:40:13][SubstituteValues] Created/cleared /app/code_files/72_872727values.txt and /app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TestVariableTracker] Initialized: codeId=72_872727, userDataPath=/app/code_files/72_872727_userdata.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=1, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=1, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=1, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=2, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=2, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=2, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=3, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=3, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=3, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=4, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=4, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=4, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=5, methodId=20, lineNumber=2, variables=arr,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=5, methodId=20: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=5, methodId=20, lineNumber=2, valuesCount=2, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=6, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=6, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=6, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=7, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=7, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=7, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=8, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=8, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=8, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=9, methodId=20, lineNumber=2, variables=arr,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=9, methodId=20: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=9, methodId=20, lineNumber=2, valuesCount=2, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=10, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=10, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=10, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=11, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=11, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=11, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=12, methodId=20, lineNumber=2, variables=arr,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=12, methodId=20: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=12, methodId=20, lineNumber=2, valuesCount=2, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=13, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=13, methodId=19: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=13, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=14, methodId=20, lineNumber=2, variables=arr,i
+[05/28/2025 10:40:16][TrackVariables] User values for step=14, methodId=20: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=14, methodId=20, lineNumber=2, valuesCount=2, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][TrackVariables] Started: step=15, methodId=21, lineNumber=3, variables=arr
+[05/28/2025 10:40:16][TrackVariables] User values for step=15, methodId=21: 
+[05/28/2025 10:40:16][TrackVariables] Completed: step=15, methodId=21, lineNumber=3, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:40:16][SubstituteValues] Code executed: /app/code_files/test72_872727modified.cs, IsSuccessful=True, StandardOutput=Отсортированный массив: 1, 2, 3, 4, 5\n, ErrorOutput=, WarningOutput=
+[05/28/2025 10:40:16][SubstituteValues] Read 39 values from /app/code_files/72_872727values.txt, 15 unique steps
+[05/28/2025 10:40:16][SubstituteValues] Read 0 mismatches from /app/code_files/72_872727mismatches.txt (0 with 5 parts, 0 with 6 parts)
+[05/28/2025 10:40:16][SubstituteValues] Generated JSON response
+[05/28/2025 10:42:36][SubstituteValues] Read 0 user data entries, 0 unique steps
+[05/28/2025 10:42:36][SubstituteValues] Saved user data to /app/code_files/72_872727_userdata.txt
+[05/28/2025 10:42:36][SubstituteValues] Created/cleared /app/code_files/72_872727values.txt and /app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:36][TestVariableTracker] Initialized: codeId=72_872727, userDataPath=/app/code_files/72_872727_userdata.txt
+[05/28/2025 10:42:36][TrackVariables] Started: step=1, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:36][TrackVariables] User values for step=1, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=1, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=2, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=2, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=2, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=3, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=3, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=3, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=4, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=4, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=4, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=5, methodId=20, lineNumber=2, variables=arr,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=5, methodId=20: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=5, methodId=20, lineNumber=2, valuesCount=2, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=6, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=6, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=6, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=7, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=7, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=7, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=8, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=8, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=8, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=9, methodId=20, lineNumber=2, variables=arr,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=9, methodId=20: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=9, methodId=20, lineNumber=2, valuesCount=2, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=10, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=10, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=10, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=11, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=11, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=11, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=12, methodId=20, lineNumber=2, variables=arr,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=12, methodId=20: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=12, methodId=20, lineNumber=2, valuesCount=2, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=13, methodId=19, lineNumber=1, variables=arr,j,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=13, methodId=19: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=13, methodId=19, lineNumber=1, valuesCount=3, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=14, methodId=20, lineNumber=2, variables=arr,i
+[05/28/2025 10:42:37][TrackVariables] User values for step=14, methodId=20: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=14, methodId=20, lineNumber=2, valuesCount=2, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][TrackVariables] Started: step=15, methodId=21, lineNumber=3, variables=arr
+[05/28/2025 10:42:37][TrackVariables] User values for step=15, methodId=21: 
+[05/28/2025 10:42:37][TrackVariables] Completed: step=15, methodId=21, lineNumber=3, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/72_872727values.txt, mismatchesPath=/app/code_files/72_872727mismatches.txt
+[05/28/2025 10:42:37][SubstituteValues] Code executed: /app/code_files/test72_872727modified.cs, IsSuccessful=True, StandardOutput=Отсортированный массив: 1, 2, 3, 4, 5\n, ErrorOutput=, WarningOutput=
+[05/28/2025 10:42:37][SubstituteValues] Read 39 values from /app/code_files/72_872727values.txt, 15 unique steps
+[05/28/2025 10:42:37][SubstituteValues] Read 0 mismatches from /app/code_files/72_872727mismatches.txt (0 with 5 parts, 0 with 6 parts)
+[05/28/2025 10:42:37][SubstituteValues] Generated JSON response
+[05/28/2025 15:06:51][ModifyTest] Read source file: /app/code_files/test73_751903.cs, lines: 17
+[05/28/2025 15:06:51][ModifyTest] Read trackers, count: 1
+[05/28/2025 15:06:51][ModifyTest] Found Main body start at line: 6
+[05/28/2025 15:06:51][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 15:06:51][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 15:06:51][ModifyTest] Inserted tracker for line 12, variables: sum
+[05/28/2025 15:06:51][ModifyTest] Added TestVariableTracker class
+[05/28/2025 15:06:51][ModifyTest] Created modified file: /app/code_files/test73_751903modified.cs, lines: 26
+[05/28/2025 15:09:20][ModifyTest] Read source file: /app/code_files/test73_751903.cs, lines: 17
+[05/28/2025 15:09:20][ModifyTest] Read trackers, count: 1
+[05/28/2025 15:09:20][ModifyTest] Found Main body start at line: 6
+[05/28/2025 15:09:20][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 15:09:20][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 15:09:20][ModifyTest] Added TestVariableTracker class
+[05/28/2025 15:09:20][ModifyTest] Created modified file: /app/code_files/test73_751903modified.cs, lines: 24
+[05/28/2025 15:11:09][ModifyTest] Read source file: /app/code_files/test73_751903.cs, lines: 17
+[05/28/2025 15:11:09][ModifyTest] Read trackers, count: 1
+[05/28/2025 15:11:09][ModifyTest] Found Main body start at line: 6
+[05/28/2025 15:11:09][ModifyTest] Parsed variable types: numbers:int[], sum:int
+[05/28/2025 15:11:09][ModifyTest] Inserted Initialize at line: 11
+[05/28/2025 15:11:09][ModifyTest] Inserted tracker for line 12, variables: sum
+[05/28/2025 15:11:09][ModifyTest] Added TestVariableTracker class
+[05/28/2025 15:11:09][ModifyTest] Created modified file: /app/code_files/test73_751903modified.cs, lines: 26
+[05/28/2025 15:12:17][SubstituteValues] Read 4 user data entries, 4 unique steps
+[05/28/2025 15:12:17][SubstituteValues] Saved user data to /app/code_files/73_751903_userdata.txt
+[05/28/2025 15:12:17][SubstituteValues] Created/cleared /app/code_files/73_751903values.txt and /app/code_files/73_751903mismatches.txt
+[05/28/2025 15:12:19][TestVariableTracker] Initialized: codeId=73_751903, userDataPath=/app/code_files/73_751903_userdata.txt
+[05/28/2025 15:12:19][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:12:19][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 15:12:19][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:12:19][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:12:19][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 15:12:19][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:12:19][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:12:19][TrackVariables] User values for step=3, methodId=12: sum=45
+[05/28/2025 15:12:20][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:12:20][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:12:20][TrackVariables] User values for step=4, methodId=12: sum=70
+[05/28/2025 15:12:20][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:12:20][SubstituteValues] Code executed: /app/code_files/test73_751903modified.cs, IsSuccessful=True, StandardOutput=Сумма: 70\n, ErrorOutput=, WarningOutput=
+[05/28/2025 15:12:20][SubstituteValues] Read 4 values from /app/code_files/73_751903values.txt, 4 unique steps
+[05/28/2025 15:12:20][SubstituteValues] Read 0 mismatches from /app/code_files/73_751903mismatches.txt (0 with 5 parts, 0 with 6 parts)
+[05/28/2025 15:12:20][SubstituteValues] Generated JSON response
+[05/28/2025 15:14:02][SubstituteValues] Read 4 user data entries, 4 unique steps
+[05/28/2025 15:14:02][SubstituteValues] Saved user data to /app/code_files/73_751903_userdata.txt
+[05/28/2025 15:14:02][SubstituteValues] Created/cleared /app/code_files/73_751903values.txt and /app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:03][TestVariableTracker] Initialized: codeId=73_751903, userDataPath=/app/code_files/73_751903_userdata.txt
+[05/28/2025 15:14:03][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:14:03][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 15:14:03][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:03][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:14:03][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 15:14:03][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:03][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:14:03][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 15:14:03][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:03][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:14:03][TrackVariables] User values for step=4, methodId=12: sum=70
+[05/28/2025 15:14:03][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:03][SubstituteValues] Code executed: /app/code_files/test73_751903modified.cs, IsSuccessful=True, StandardOutput=Сумма: 70\n, ErrorOutput=, WarningOutput=
+[05/28/2025 15:14:03][SubstituteValues] Read 4 values from /app/code_files/73_751903values.txt, 4 unique steps
+[05/28/2025 15:14:03][SubstituteValues] Read 2 mismatches from /app/code_files/73_751903mismatches.txt (0 with 5 parts, 2 with 6 parts)
+[05/28/2025 15:14:03][SubstituteValues] Generated JSON response
+[05/28/2025 15:14:31][SubstituteValues] Read 4 user data entries, 4 unique steps
+[05/28/2025 15:14:31][SubstituteValues] Saved user data to /app/code_files/73_751903_userdata.txt
+[05/28/2025 15:14:31][SubstituteValues] Created/cleared /app/code_files/73_751903values.txt and /app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:31][TestVariableTracker] Initialized: codeId=73_751903, userDataPath=/app/code_files/73_751903_userdata.txt
+[05/28/2025 15:14:31][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:14:31][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 15:14:31][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:31][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:14:31][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 15:14:31][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:31][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:14:31][TrackVariables] User values for step=3, methodId=12: sum=46
+[05/28/2025 15:14:31][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:31][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:14:31][TrackVariables] User values for step=4, methodId=12: sum=70
+[05/28/2025 15:14:31][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:14:31][SubstituteValues] Code executed: /app/code_files/test73_751903modified.cs, IsSuccessful=True, StandardOutput=Сумма: 70\n, ErrorOutput=, WarningOutput=
+[05/28/2025 15:14:31][SubstituteValues] Read 4 values from /app/code_files/73_751903values.txt, 4 unique steps
+[05/28/2025 15:14:31][SubstituteValues] Read 2 mismatches from /app/code_files/73_751903mismatches.txt (0 with 5 parts, 2 with 6 parts)
+[05/28/2025 15:14:31][SubstituteValues] Generated JSON response
+[05/28/2025 15:16:41][SubstituteValues] Read 4 user data entries, 4 unique steps
+[05/28/2025 15:16:41][SubstituteValues] Saved user data to /app/code_files/73_751903_userdata.txt
+[05/28/2025 15:16:41][SubstituteValues] Created/cleared /app/code_files/73_751903values.txt and /app/code_files/73_751903mismatches.txt
+[05/28/2025 15:16:41][TestVariableTracker] Initialized: codeId=73_751903, userDataPath=/app/code_files/73_751903_userdata.txt
+[05/28/2025 15:16:41][TrackVariables] Started: step=1, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:16:41][TrackVariables] User values for step=1, methodId=12: sum=10
+[05/28/2025 15:16:41][TrackVariables] Completed: step=1, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:16:41][TrackVariables] Started: step=2, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:16:42][TrackVariables] User values for step=2, methodId=12: sum=25
+[05/28/2025 15:16:42][TrackVariables] Completed: step=2, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:16:42][TrackVariables] Started: step=3, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:16:42][TrackVariables] User values for step=3, methodId=12: 
+[05/28/2025 15:16:42][TrackVariables] Completed: step=3, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=1, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:16:42][TrackVariables] Started: step=4, methodId=12, lineNumber=1, variables=sum
+[05/28/2025 15:16:42][TrackVariables] User values for step=4, methodId=12: sum=70
+[05/28/2025 15:16:42][TrackVariables] Completed: step=4, methodId=12, lineNumber=1, valuesCount=1, mismatchesCount=0, valuesPath=/app/code_files/73_751903values.txt, mismatchesPath=/app/code_files/73_751903mismatches.txt
+[05/28/2025 15:16:42][SubstituteValues] Code executed: /app/code_files/test73_751903modified.cs, IsSuccessful=True, StandardOutput=Сумма: 70\n, ErrorOutput=, WarningOutput=
+[05/28/2025 15:16:42][SubstituteValues] Read 4 values from /app/code_files/73_751903values.txt, 4 unique steps
+[05/28/2025 15:16:42][SubstituteValues] Read 1 mismatches from /app/code_files/73_751903mismatches.txt (1 with 5 parts, 0 with 6 parts)
+[05/28/2025 15:16:42][SubstituteValues] Generated JSON response

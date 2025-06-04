@@ -8,8 +8,8 @@ using System.Text.Json;
 class Program
 {
     static void Main(string []args)
-    await TestVariableTracker.Initialize("64_521473", "/app/code_files/64_521473_userdata.txt");
     {
+    await TestVariableTracker.Initialize("64_521473", "/app/code_files/64_521473_userdata.txt");
         int[] numbers = { 10,15,20 };
         int sum = 0;
 
