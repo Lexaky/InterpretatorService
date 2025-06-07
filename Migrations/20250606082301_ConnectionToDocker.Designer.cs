@@ -2,6 +2,7 @@
 using InterpretatorService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InterpretatorService.Migrations
 {
     [DbContext(typeof(TestsDbContext))]
-    partial class TestsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250606082301_ConnectionToDocker")]
+    partial class ConnectionToDocker
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,6 +70,7 @@ namespace InterpretatorService.Migrations
                         .HasColumnName("algo_name");
 
                     b.Property<string>("PicPath")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("pic_path");
 

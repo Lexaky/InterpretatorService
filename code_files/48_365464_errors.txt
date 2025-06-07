@@ -1,5 +1,0 @@
-A using clause must precede all other elements defined in the namespace except extern alias declarations
-Embedded statement cannot be a declaration or labeled statement
-The name 'updates_12_0' does not exist in the current context
-The name 'updatesVar' does not exist in the current context
-The name 'number' does not exist in the current context

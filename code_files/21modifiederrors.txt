@@ -1,2 +1,0 @@
-The name 'Path' does not exist in the current context
-The name 'codeId' does not exist in the current context

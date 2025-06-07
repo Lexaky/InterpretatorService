@@ -1847,3 +1847,19 @@
 [05/28/2025 15:16:42][SubstituteValues] Read 4 values from /app/code_files/73_751903values.txt, 4 unique steps
 [05/28/2025 15:16:42][SubstituteValues] Read 1 mismatches from /app/code_files/73_751903mismatches.txt (1 with 5 parts, 0 with 6 parts)
 [05/28/2025 15:16:42][SubstituteValues] Generated JSON response
+[06/06/2025 12:50:09][Upload] Error: An exception has been raised that is likely due to a transient failure.
+[06/06/2025 12:55:54][Upload] Error: Name or service not known
+[06/06/2025 13:00:22][Upload] Error: An exception has been raised that is likely due to a transient failure.
+[06/06/2025 13:06:20][Upload] Error: An exception has been raised that is likely due to a transient failure.
+[06/06/2025 13:10:59][Upload] Error: An error occurred while saving the entity changes. See the inner exception for details.
+[06/06/2025 13:23:32][Upload] Successfully uploaded algorithm: algo_id=2, name=string, code_path=/app/code_files/2.cs, image_path=none
+[06/06/2025 16:35:14][GetSourceFileAlgorithm] Error: Файл алгоритма /2.cs не найден.
+[06/06/2025 16:41:47][GetSourceFileAlgorithm] Successfully retrieved file: algo_id=2, path=/app/code_files/2.cs
+[06/06/2025 16:44:27][GetPicByAlgo] Error: Файл изображения для алгоритма с ID 2 не найден.
+[06/06/2025 16:44:58][UpdateAlgorithmName] Successfully updated name: algo_id=2, new_name=Алгоритм суммирования элементов в массиве
+[06/06/2025 17:11:39][UpdateAlgorithmPicture] Successfully updated picture: algo_id=2, image_path=/app/code_files/2.jpg
+[06/07/2025 10:21:16][LoadAlgoSteps] Error: Name or service not known
+[06/07/2025 10:22:29][LoadAlgoSteps] Error: Name or service not known
+[06/07/2025 10:25:25][LoadAlgoSteps] Error: Name or service not known
+[06/07/2025 10:30:10][LoadAlgoSteps] Successfully added step: algo_id=2, step=1
+[06/07/2025 10:31:25][LoadTrackedVariables] Successfully added variable: algo_id=2, step=1, sequence=1

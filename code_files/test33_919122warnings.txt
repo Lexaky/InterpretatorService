@@ -1,1 +1,0 @@
-The entry point of the program is global code; ignoring 'Program.Main(string[])' entry point.

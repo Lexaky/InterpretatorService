@@ -1,3 +1,0 @@
-19 arr i j
-20 arr i
-21 arr

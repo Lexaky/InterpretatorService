@@ -1,4 +1,0 @@
-The name 'usingSystem' does not exist in the current context
-Only assignment, call, increment, decrement, await, and new object expressions can be used as a statement
-'Array' does not contain a definition for 'Cast' and no accessible extension method 'Cast' accepting a first argument of type 'Array' could be found (are you missing a using directive or an assembly reference?)
-'List<object>' does not contain a definition for 'Select' and no accessible extension method 'Select' accepting a first argument of type 'List<object>' could be found (are you missing a using directive or an assembly reference?)

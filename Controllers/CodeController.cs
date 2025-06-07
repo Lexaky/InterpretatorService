@@ -30,6 +30,7 @@ namespace InterpretatorService.Controllers
         private readonly IInterpreterService _interpreterService;
         private readonly TestsDbContext _dbContext;
         private const string StorageDirectory = "/app/code_files";
+        private readonly string _debugLogPath = "/app/code_files/debug.txt";
 
         public CodeController(IInterpreterService interpreterService, TestsDbContext dbContext)
         {
@@ -45,302 +46,443 @@ namespace InterpretatorService.Controllers
 
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadCodeFile([FromForm] UploadCodeRequestDto request)
+        public async Task<IActionResult> Upload([FromForm] UploadCodeRequestDto request)
         {
-            var codeFile = request.CodeFile;
-
-            if (codeFile == null || codeFile.Length == 0 || Path.GetExtension(codeFile.FileName).ToLower() != ".cs")
-            {
-                using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                    await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] wrong cs file uploaded...");
-                return BadRequest("Please upload a valid .cs file.");
-            }
-
             try
             {
-                // Проверяем и создаём директорию StorageDirectory
-                if (!Directory.Exists(StorageDirectory))
+                // Проверка входных данных
+                if (string.IsNullOrWhiteSpace(request.AlgorithmName))
                 {
-                    Console.WriteLine($"Creating directory {StorageDirectory}...");
-                    using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                        await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] Creating directory /app/code_files...");
-                    Directory.CreateDirectory(StorageDirectory);
+                    string error = "Название алгоритма не указано.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][Upload] Error: {error}\n");
+                    return BadRequest(error);
                 }
 
-                Console.WriteLine("Attempting to connect to PostgreSQL...");
-                using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                    await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] Attempting to connect to PostgreSQL...");
-                int codeId;
-                using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+                if (request.CodeFile == null || request.CodeFile.Length == 0)
                 {
-                    Console.WriteLine("Creating new Algorithm entry...");
-                    using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                        await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] Creating new Algorithm entry...");
-                    var newAlgorithm = new Algorithm { AlgoPath = "" };
-                    _dbContext.Algorithms.Add(newAlgorithm);
-                    Console.WriteLine("Saving changes to 'Algorithms' table...");
-                    using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                        await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] Saving changes to 'Algorithms' table...");
-                    await _dbContext.SaveChangesAsync();
-                    codeId = newAlgorithm.AlgoId;
-                    Console.WriteLine($"Generated AlgoId: {codeId}");
-                    using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                        await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] {codeId}; Generated AlgoId: {codeId}");
-                    await transaction.CommitAsync();
+                    string error = "Файл кода .cs не предоставлен или пуст.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][Upload] Error: {error}\n");
+                    return BadRequest(error);
                 }
 
-                string codeFilePath = Path.Combine(StorageDirectory, $"{codeId}.cs");
-
-                if (System.IO.File.Exists(codeFilePath))
+                if (!request.CodeFile.FileName.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
                 {
-                    return BadRequest($"Algorithm with ID {codeId} already exists.");
+                    string error = "Файл кода должен иметь расширение .cs.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][Upload] Error: {error}\n");
+                    return BadRequest(error);
                 }
 
-                // Сохраняем файл .cs
-                Console.WriteLine($"Saving code file to {codeFilePath}");
-                using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                    await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] Attempt to save code file to {codeFilePath}");
-                using (var stream = new FileStream(codeFilePath, FileMode.Create))
+                if (request.ImageFile != null && !request.ImageFile.FileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) && !request.ImageFile.FileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
                 {
-                    await codeFile.CopyToAsync(stream);
-                    await stream.FlushAsync(); // Гарантируем запись на диск
-                    Console.WriteLine($"Code file {codeFilePath} saved successfully.");
-                    using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                        await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] Successfully saved code file to {codeFilePath}");
+                    string error = "Файл изображения должен иметь расширение .jpeg или .jpg.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][Upload] Error: {error}\n");
+                    return BadRequest(error);
                 }
 
-                // Обновляем AlgoPath
-                Console.WriteLine($"Updating AlgoPath for AlgoId: {codeId}");
-                var algorithm = await _dbContext.Algorithms.FindAsync(codeId);
-                algorithm.AlgoPath = codeFilePath;
+                // Проверка уникальности имени алгоритма
+                if (await _dbContext.Algorithms.AnyAsync(a => a.AlgorithmName == request.AlgorithmName))
+                {
+                    string error = $"Алгоритм с именем '{request.AlgorithmName}' уже существует.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][Upload] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Формируем пути для файлов
+                int algoId = 0; // Временное значение, будет обновлено после сохранения
+                string codeFilePath = Path.Combine(StorageDirectory, $"{algoId}.cs");
+                string imageFilePath = request.ImageFile != null ? Path.Combine(StorageDirectory, $"{algoId}{Path.GetExtension(request.ImageFile.FileName).ToLower()}") : null;
+
+                // Создаём запись в БД
+                var algorithm = new Algorithm
+                {
+                    AlgoPath = StorageDirectory,
+                    PicPath = imageFilePath ?? "", // Задаём пустую строку, если изображение не предоставлено
+                    AlgorithmName = request.AlgorithmName
+                };
+
+                _dbContext.Algorithms.Add(algorithm);
                 await _dbContext.SaveChangesAsync();
-                Console.WriteLine($"AlgoPath updated to {codeFilePath}");
 
-                return Ok(new { CodeId = codeId });
+                // Получаем сгенерированный algo_id
+                algoId = algorithm.AlgoId;
+
+                // Обновляем пути с учётом algo_id
+                codeFilePath = Path.Combine(StorageDirectory, $"{algoId}.cs");
+                if (imageFilePath != null)
+                {
+                    imageFilePath = Path.Combine(StorageDirectory, $"{algoId}{Path.GetExtension(request.ImageFile.FileName).ToLower()}");
+                    algorithm.PicPath = imageFilePath;
+                }
+
+                // Сохраняем файл кода
+                using (var codeStream = new FileStream(codeFilePath, FileMode.Create, FileAccess.Write))
+                {
+                    await request.CodeFile.CopyToAsync(codeStream);
+                }
+
+                // Сохраняем изображение, если предоставлено
+                if (request.ImageFile != null)
+                {
+                    using (var imageStream = new FileStream(imageFilePath, FileMode.Create, FileAccess.Write))
+                    {
+                        await request.ImageFile.CopyToAsync(imageStream);
+                    }
+                    await _dbContext.SaveChangesAsync(); // Сохраняем обновлённый PicPath
+                }
+
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][Upload] Successfully uploaded algorithm: algo_id={algoId}, name={request.AlgorithmName}, code_path={codeFilePath}, image_path={imageFilePath ?? "none"}\n");
+
+                // Возвращаем ответ с algo_id
+                return Ok(new { algo_id = algoId });
             }
             catch (Exception ex)
             {
-                var errorMessage = ex.Message;
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                    errorMessage += $"\nInner Exception: {ex.Message}";
-                }
-                Console.WriteLine($"UploadCodeFile exception: {errorMessage}\nStackTrace: {ex.StackTrace}");
-                using (StreamWriter writer = new StreamWriter(Path.Combine(StorageDirectory, "logs.txt"), true))
-                    await writer.WriteLineAsync($"[{DateTime.Now}][Launch Subsystem] Undefined Error next trace:\nUploadCodeFile exception: {errorMessage}\nStackTrace: {ex.StackTrace}");
-                return StatusCode(500, new CodeResponseDto
-                {
-                    Output = "",
-                    Error = $"Server error: {errorMessage}",
-                    ExecutionTime = 0,
-                    IsSuccessful = false
-                });
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][Upload] Error: {ex.Message}\n");
+                return StatusCode(500, $"Ошибка при загрузке алгоритма: {ex.Message}");
             }
         }
-        
-        [HttpPost("modify/{codeId}")]
-        public async Task<IActionResult> ModifyCode(int codeId)
+
+        [HttpGet("{algoId}/source")]
+        public async Task<IActionResult> GetSourceFileAlgorithm(int algoId)
         {
-            string codeFilePath = Path.Combine(StorageDirectory, $"{codeId}.cs");
-            string metaFilePath = Path.Combine(StorageDirectory, $"{codeId}init.txt");
-            string modifiedFilePath = Path.Combine(StorageDirectory, $"{codeId}modified.cs");
-            string errorsPath = Path.Combine(StorageDirectory, $"{codeId}errors.txt");
-            string warningsPath = Path.Combine(StorageDirectory, $"{codeId}warnings.txt");
-            string outputPath = Path.Combine(StorageDirectory, $"{codeId}output.txt");
-            string valuesFilePath = Path.Combine(StorageDirectory, $"{codeId}values.txt");
-            string modifiedErrorsPath = Path.Combine(StorageDirectory, $"{codeId}modifiederrors.txt");
-            string modifiedOutputPath = Path.Combine(StorageDirectory, $"{codeId}modifiedoutput.txt");
-            string modifiedWarningsPath = Path.Combine(StorageDirectory, $"{codeId}modifiedwarnings.txt");
-
-            if (!System.IO.File.Exists(codeFilePath))
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] code file with ID " + codeId.ToString() + " was not found");
-                return NotFound($"Code file with ID {codeId} not found.");
-            }
-            if (!System.IO.File.Exists(metaFilePath))
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] metafile with ID " + codeId.ToString() + " was not found");
-                return NotFound($"Meta file with ID {codeId} not found.");
-            }
-
             try
             {
-                var filesToDelete = new[]
+                // Проверяем существование алгоритма в БД
+                var algorithm = await _dbContext.Algorithms.FirstOrDefaultAsync(a => a.AlgoId == algoId);
+                if (algorithm == null)
                 {
-                    modifiedFilePath, errorsPath, warningsPath, outputPath, valuesFilePath,
-                    modifiedErrorsPath, modifiedOutputPath, modifiedWarningsPath
-                };
-                foreach (var file in filesToDelete)
-                {
-                    if (System.IO.File.Exists(file))
-                    {
-                        using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                            writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] rewriting txt files with ID " + codeId.ToString());
-                        Console.WriteLine($"Deleting existing file: {file}");
-                        System.IO.File.Delete(file);
-                    }
-                }
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] reading code file " + codeFilePath.ToString());
-                Console.WriteLine($"Reading code file: {codeFilePath}");
-                string code = await System.IO.File.ReadAllTextAsync(codeFilePath);
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] reading metafile " + metaFilePath.ToString());
-                Console.WriteLine($"Reading meta file: {metaFilePath}");
-                var metaLines = await System.IO.File.ReadAllLinesAsync(metaFilePath);
-                var trackLines = new List<(int LineNumber, string[] VariableNames)>();
-                foreach (var line in metaLines)
-                {
-                    var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length < 1 || !int.TryParse(parts[0], out int lineNumber))
-                    {
-                        using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                            writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] skip metafile line: " + line.ToString());
-                        Console.WriteLine($"Skipping invalid meta line: {line}");
-                        continue;
-                    }
-                    var variableNames = parts.Skip(1).Select(v => v.Trim()).ToArray();
-                    trackLines.Add((LineNumber: lineNumber, VariableNames: variableNames));
-                }
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Modifying code for AlgoId: " + codeId.ToString());
-                Console.WriteLine($"Modifying code for AlgoId: {codeId}");
-                string modifiedCode = ModifyCode(code, trackLines, codeId);
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Writing modified code to: " + modifiedFilePath.ToString());
-                Console.WriteLine($"Writing modified code to: {modifiedFilePath}");
-                await System.IO.File.WriteAllTextAsync(modifiedFilePath, modifiedCode);
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Removing existing AlgoSteps for AlgoId: " + codeId.ToString());
-                Console.WriteLine($"Removing existing AlgoSteps for AlgoId: {codeId}");
-                var oldSteps = _dbContext.AlgoSteps.Where(s => s.AlgoId == codeId);
-                _dbContext.AlgoSteps.RemoveRange(oldSteps);
-                await _dbContext.SaveChangesAsync();
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Existing AlgoSteps removed successfully");
-                Console.WriteLine("Existing AlgoSteps removed successfully.");
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Executing modified code: " + modifiedFilePath.ToString());
-                Console.WriteLine($"Executing modified code: {modifiedFilePath}");
-                var stopwatch = Stopwatch.StartNew();
-                var codeModel = await _interpreterService.ExecuteCodeAsync(modifiedFilePath);
-                stopwatch.Stop();
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem]" + $" ExecuteCodeAsync result: CodeId={codeModel.CodeId}, IsSuccessful={codeModel.IsSuccessful}, ErrorOutput={codeModel.ErrorOutput}");
-                Console.WriteLine($"ExecuteCodeAsync result: CodeId={codeModel.CodeId}, IsSuccessful={codeModel.IsSuccessful}, ErrorOutput={codeModel.ErrorOutput}");
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Writing errors to: " + errorsPath.ToString());
-                Console.WriteLine($"Writing errors to: {errorsPath}");
-                await System.IO.File.WriteAllTextAsync(errorsPath, codeModel.ErrorOutput ?? "");
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Writing warnings to: " + warningsPath.ToString());
-                Console.WriteLine($"Writing warnings to: {warningsPath}");
-                await System.IO.File.WriteAllTextAsync(warningsPath, codeModel.WarningOutput ?? "");
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Writing output to: " + outputPath.ToString());
-                Console.WriteLine($"Writing output to: {outputPath}");
-                await System.IO.File.WriteAllTextAsync(outputPath, codeModel.StandardOutput ?? "");
-
-                if (!codeModel.IsSuccessful || !string.IsNullOrEmpty(codeModel.ErrorOutput))
-                {
-                    return StatusCode(500, new CodeResponseDto
-                    {
-                        Output = codeModel.StandardOutput ?? "",
-                        Error = codeModel.ErrorOutput ?? "Unknown error occurred during code execution",
-                        ExecutionTime = stopwatch.ElapsedMilliseconds,
-                        IsSuccessful = false
-                    });
+                    string error = $"Алгоритм с ID {algoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][GetSourceFileAlgorithm] Error: {error}\n");
+                    return NotFound(error);
                 }
 
-                if (System.IO.File.Exists(valuesFilePath))
+                // Формируем путь к файлу
+                string filePath = Path.Combine(StorageDirectory, $"{algoId}.cs");
+
+                // Проверяем существование файла
+                if (!System.IO.File.Exists(filePath))
                 {
-                    using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                        writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Reading values file: " + valuesFilePath.ToString());
-                    Console.WriteLine($"Reading values file: {valuesFilePath}");
-                    var valueLines = await System.IO.File.ReadAllLinesAsync(valuesFilePath);
-
-                    foreach (var line in valueLines)
-                    {
-                        using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                            writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Processing value line: " + line.ToString());
-                        Console.WriteLine($"Processing value line: {line}");
-                        var parts = line.Split("//");
-                        if (parts.Length != 5)
-                        {
-                            using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                                writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Skipping invalid value line: " + line.ToString());
-                            Console.WriteLine($"Skipping invalid value line: {line}");
-                            continue;
-                        }
-
-                        if (!int.TryParse(parts[0], out int step))
-                        {
-                            using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                                writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Invalid step value in line: " + line.ToString());
-                            Console.WriteLine($"Invalid step value in line: {line}");
-                            continue;
-                        }
-
-                        var algoStep = new AlgoStep
-                        {
-                            AlgoId = codeId,
-                            Step = step,
-                            Type = parts[2],
-                            VarName = parts[1],
-                            Value = parts[4]
-                        };
-
-                        using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                            writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] " + $"Adding AlgoStep: AlgoId={algoStep.AlgoId}, Step={algoStep.Step}, VarName={algoStep.VarName}, Value={algoStep.Value}");
-                        Console.WriteLine($"Adding AlgoStep: AlgoId={algoStep.AlgoId}, Step={algoStep.Step}, VarName={algoStep.VarName}, Value={algoStep.Value}");
-                        _dbContext.AlgoSteps.Add(algoStep);
-                    }
-
-                    using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                        writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Saving AlgoSteps to database...");
-                    Console.WriteLine("Saving AlgoSteps to database...");
-                    await _dbContext.SaveChangesAsync();
-                    using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                        writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] AlgoSteps saved successfully.");
-                    Console.WriteLine("AlgoSteps saved successfully.");
-                }
-                else
-                {
-                    using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                        writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] Values file not found: " + valuesFilePath.ToString());
-                    Console.WriteLine($"Values file not found: {valuesFilePath}");
+                    string error = $"Файл алгоритма {filePath} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][GetSourceFileAlgorithm] Error: {error}\n");
+                    return NotFound(error);
                 }
 
-                return Ok(new { CodeId = codeId });
+                // Читаем файл
+                var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][GetSourceFileAlgorithm] Successfully retrieved file: algo_id={algoId}, path={filePath}\n");
+
+                // Возвращаем файл
+                return File(fileStream, "text/plain", $"{algoId}.cs");
             }
             catch (Exception ex)
             {
-                var errorMessage = ex.Message;
-                while (ex.InnerException != null)
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][GetSourceFileAlgorithm] Error: {ex.Message}\n");
+                return StatusCode(500, $"Ошибка при получении файла: {ex.Message}");
+            }
+        }
+
+        [HttpPut("picture")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateAlgorithmPicture([FromForm] UpdatePictureRequestDto request)
+        {
+            try
+            {
+                // Проверяем входные данные
+                if (request.ImageFile == null || request.ImageFile.Length == 0)
                 {
-                    ex = ex.InnerException;
-                    errorMessage += $"\nInner Exception: {ex.Message}";
+                    string error = "Файл изображения не предоставлен или пуст.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmPicture] Error: {error}\n");
+                    return BadRequest(error);
                 }
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][Modify Subsystem] " + $"ModifyCode exception: {errorMessage}\nStackTrace: {ex.StackTrace}");
-                Console.WriteLine($"ModifyCode exception: {errorMessage}\nStackTrace: {ex.StackTrace}");
-                return StatusCode(500, new CodeResponseDto
+
+                if (!request.ImageFile.FileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) && !request.ImageFile.FileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
                 {
-                    Output = "",
-                    Error = $"Server error: {errorMessage}",
-                    ExecutionTime = 0,
-                    IsSuccessful = false
-                });
+                    string error = "Файл изображения должен иметь расширение .jpeg или .jpg.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmPicture] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Проверяем существование алгоритма
+                var algorithm = await _dbContext.Algorithms.FirstOrDefaultAsync(a => a.AlgoId == request.AlgoId);
+                if (algorithm == null)
+                {
+                    string error = $"Алгоритм с ID {request.AlgoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmPicture] Error: {error}\n");
+                    return NotFound(error);
+                }
+
+                // Проверяем существование файла алгоритма
+                string codeFilePath = Path.Combine(StorageDirectory, $"{request.AlgoId}.cs");
+                if (!System.IO.File.Exists(codeFilePath))
+                {
+                    string error = $"Файл алгоритма {codeFilePath} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmPicture] Error: {error}\n");
+                    return NotFound(error);
+                }
+
+                // Формируем путь для изображения
+                string imageFilePath = Path.Combine(StorageDirectory, $"{request.AlgoId}{Path.GetExtension(request.ImageFile.FileName).ToLower()}");
+
+                // Сохраняем изображение
+                using (var imageStream = new FileStream(imageFilePath, FileMode.Create, FileAccess.Write))
+                {
+                    await request.ImageFile.CopyToAsync(imageStream);
+                }
+
+                // Обновляем pic_path в БД
+                algorithm.PicPath = imageFilePath;
+                await _dbContext.SaveChangesAsync();
+
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmPicture] Successfully updated picture: algo_id={request.AlgoId}, image_path={imageFilePath}\n");
+
+                return Ok("Изображение успешно обновлено.");
+            }
+            catch (Exception ex)
+            {
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmPicture] Error: {ex.Message}\n");
+                return StatusCode(500, $"Ошибка при обновлении изображения: {ex.Message}");
+            }
+        }
+
+        [HttpPut("{algoId}/name")]
+        public async Task<IActionResult> UpdateAlgorithmName(int algoId, [FromBody] string newName)
+        {
+            try
+            {
+                // Проверка входных данных
+                if (string.IsNullOrWhiteSpace(newName))
+                {
+                    string error = "Новое название алгоритма не указано.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmName] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Проверяем существование алгоритма
+                var algorithm = await _dbContext.Algorithms.FirstOrDefaultAsync(a => a.AlgoId == algoId);
+                if (algorithm == null)
+                {
+                    string error = $"Алгоритм с ID {algoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmName] Error: {error}\n");
+                    return NotFound(error);
+                }
+
+                // Проверяем уникальность нового имени
+                if (await _dbContext.Algorithms.AnyAsync(a => a.AlgorithmName == newName && a.AlgoId != algoId))
+                {
+                    string error = $"Алгоритм с именем '{newName}' уже существует.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmName] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Обновляем имя
+                algorithm.AlgorithmName = newName;
+                await _dbContext.SaveChangesAsync();
+
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmName] Successfully updated name: algo_id={algoId}, new_name={newName}\n");
+
+                return Ok("Название алгоритма успешно обновлено.");
+            }
+            catch (Exception ex)
+            {
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][UpdateAlgorithmName] Error: {ex.Message}\n");
+                return StatusCode(500, $"Ошибка при обновлении названия: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{algoId}")]
+        public async Task<IActionResult> DeleteAlgorithm(int algoId)
+        {
+            try
+            {
+                // Проверяем существование алгоритма
+                var algorithm = await _dbContext.Algorithms.FirstOrDefaultAsync(a => a.AlgoId == algoId);
+                if (algorithm == null)
+                {
+                    string error = $"Алгоритм с ID {algoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][DeleteAlgorithm] Error: {error}\n");
+                    return NotFound(error);
+                }
+
+                // Формируем путь к файлу
+                string codeFilePath = Path.Combine(StorageDirectory, $"{algoId}.cs");
+
+                // Удаляем запись из БД
+                _dbContext.Algorithms.Remove(algorithm);
+                await _dbContext.SaveChangesAsync();
+
+                // Удаляем файл кода, если он существует
+                if (System.IO.File.Exists(codeFilePath))
+                {
+                    System.IO.File.Delete(codeFilePath);
+                }
+
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][DeleteAlgorithm] Successfully deleted algorithm: algo_id={algoId}, code_path={codeFilePath}\n");
+
+                return Ok("Алгоритм успешно удалён.");
+            }
+            catch (Exception ex)
+            {
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][DeleteAlgorithm] Error: {ex.Message}\n");
+                return StatusCode(500, $"Ошибка при удалении алгоритма: {ex.Message}");
+            }
+        }
+
+        [HttpPost("steps")]
+        public async Task<IActionResult> LoadAlgoSteps([FromBody] AlgoStepRequest request)
+        {
+            try
+            {
+                // Проверка входных данных
+                if (request == null || string.IsNullOrWhiteSpace(request.Description) || request.Step <= 0)
+                {
+                    string error = "Описание шага, номер шага или данные запроса не указаны.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadAlgoSteps] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Проверяем существование алгоритма
+                if (!await _dbContext.Algorithms.AnyAsync(a => a.AlgoId == request.AlgoId))
+                {
+                    string error = $"Алгоритм с ID {request.AlgoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadAlgoSteps] Error: {error}\n");
+                    return NotFound(error);
+                }
+
+                // Проверяем уникальность шага для алгоритма
+                if (await _dbContext.AlgoSteps.AnyAsync(s => s.AlgoId == request.AlgoId && s.Step == request.Step))
+                {
+                    string error = $"Шаг {request.Step} для алгоритма {request.AlgoId} уже существует.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadAlgoSteps] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Создаём запись
+                var algoStep = new AlgoStep
+                {
+                    AlgoId = request.AlgoId,
+                    Step = request.Step,
+                    Description = request.Description,
+                    Difficult = request.Difficult ?? 0.5f
+                };
+
+                _dbContext.AlgoSteps.Add(algoStep);
+                await _dbContext.SaveChangesAsync();
+
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadAlgoSteps] Successfully added step: algo_id={request.AlgoId}, step={request.Step}\n");
+
+                return Ok(new { step = algoStep.Step });
+            }
+            catch (Exception ex)
+            {
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadAlgoSteps] Error: {ex.Message}\n");
+                return StatusCode(500, $"Ошибка при добавлении шага: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost("{algoId}/tracked-variables")]
+        public async Task<IActionResult> LoadTrackedVariables(int algoId, [FromBody] TrackVariableRequest request)
+        {
+            try
+            {
+                // Проверка входных данных
+                if (request == null || string.IsNullOrWhiteSpace(request.VarType) || string.IsNullOrWhiteSpace(request.VarName) || request.LineNumber <= 0 || request.Step <= 0)
+                {
+                    string error = "Данные переменной, номер строки, тип, имя или шаг не указаны.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadTrackedVariables] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Проверяем существование алгоритма
+                if (!await _dbContext.Algorithms.AnyAsync(a => a.AlgoId == algoId))
+                {
+                    string error = $"Алгоритм с ID {algoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadTrackedVariables] Error: {error}\n");
+                    return NotFound(error);
+                }
+
+                // Проверяем существование шага
+                if (!await _dbContext.AlgoSteps.AnyAsync(s => s.AlgoId == algoId && s.Step == request.Step))
+                {
+                    string error = $"Шаг {request.Step} для алгоритма {algoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadTrackedVariables] Error: {error}\n");
+                    return NotFound(error);
+                }
+
+                // Создаём запись
+                var trackVariable = new TrackVariable
+                {
+                    LineNumber = request.LineNumber,
+                    VarType = request.VarType,
+                    VarName = request.VarName,
+                    Step = request.Step
+                };
+
+                // Устанавливаем AlgoId через EF
+                _dbContext.Entry(trackVariable).Property("AlgoId").CurrentValue = algoId;
+                _dbContext.TrackVariables.Add(trackVariable);
+                await _dbContext.SaveChangesAsync();
+
+                // Формируем JSON-ответ
+                var response = new
+                {
+                    sequence = trackVariable.Sequence,
+                    line_number = trackVariable.LineNumber,
+                    var_type = trackVariable.VarType,
+                    var_name = trackVariable.VarName,
+                    algo_step = trackVariable.Step,
+                    algo_id = algoId
+                };
+
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadTrackedVariables] Successfully added variable: algo_id={algoId}, step={request.Step}, sequence={trackVariable.Sequence}\n");
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][LoadTrackedVariables] Error: {ex.Message}\n");
+                return StatusCode(500, $"Ошибка при добавлении переменной: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("{algoId}/picture")]
+        public async Task<IActionResult> GetPicByAlgo(int algoId)
+        {
+            try
+            {
+                // Проверяем существование алгоритма в БД
+                var algorithm = await _dbContext.Algorithms.FirstOrDefaultAsync(a => a.AlgoId == algoId);
+                if (algorithm == null)
+                {
+                    string error = $"Алгоритм с ID {algoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][GetPicByAlgo] Error: {error}\n");
+                    return NotFound(error);
+                }
+                // Формируем наличие к файлу изображения
+                string jpegPath = Path.Combine(StorageDirectory, $"{algoId}.jpeg");
+                string jpgPath = Path.Combine(StorageDirectory, $"{algoId}.jpg");
+
+                // Проверяем существование файла изображения
+                string imagePath = System.IO.File.Exists(jpegPath) ? jpegPath : System.IO.File.Exists(jpgPath) ? jpgPath : null;
+                if (imagePath == null)
+                {
+                    string error = $"Файл изображения для алгоритма с ID {algoId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][GetPicByAlgo] Error: {error}\n");
+                    return NotFound(error);
+                }
+
+                // Читаем файл
+                var fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][GetPicByAlgo] Successfully retrieved image: algo_id={algoId}, path={imagePath}\n");
+
+                // Возвращаем файл
+                return File(fileStream, "image/jpeg", Path.GetFileName(imagePath));
+            }
+            catch (Exception ex)
+            {
+                await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][GetPicByAlgo] Error: {ex.Message}\n");
+                return StatusCode(500, $"Ошибка при получении изображения: {ex.Message}");
             }
         }
 
@@ -395,126 +537,6 @@ namespace InterpretatorService.Controllers
                     ExecutionTime = 0,
                     IsSuccessful = false
                 });
-            }
-        }
-
-        [HttpGet("values/{codeId}")]
-        public IActionResult GetValuesFile(int codeId)
-        {
-            string valuesFilePath = Path.Combine(StorageDirectory, $"{codeId}values.txt");
-            if (!System.IO.File.Exists(valuesFilePath))
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][General] GetValuesFile error: " + $"Values file not found for id: " + codeId.ToString());
-
-                return NotFound("Values file not found.");
-            }
-
-            return PhysicalFile(valuesFilePath, "text/plain", Path.GetFileName(valuesFilePath));
-        }
-
-        [HttpGet("warnings/{codeId}")]
-        public IActionResult GetWarningsFile(int codeId)
-        {
-            string warningFilePath = Path.Combine(StorageDirectory, $"{codeId}warnings.txt");
-            if (!System.IO.File.Exists(warningFilePath))
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][General] GetWarningsFile error: " + $"Warnings file not found for id: " + codeId.ToString());
-
-                return NotFound("Warnings file not found.");
-            }
-
-            return PhysicalFile(warningFilePath, "text/plain", Path.GetFileName(warningFilePath));
-        }
-
-        [HttpGet("errors/{codeId}")]
-        public IActionResult GetErrorsFile(int codeId)
-        {
-            string errorFilePath = Path.Combine(StorageDirectory, $"{codeId}errors.txt");
-            if (!System.IO.File.Exists(errorFilePath))
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][General] GetErrorsFile error: " + $"Errors file not found for id: " + codeId.ToString());
-
-                return NotFound("Errors file not found.");
-            }
-
-            return PhysicalFile(errorFilePath, "text/plain", Path.GetFileName(errorFilePath));
-        }
-
-        [HttpGet("output/{codeId}")]
-        public IActionResult GetOutputFile(int codeId)
-        {
-            string outputFilePath = Path.Combine(StorageDirectory, $"{codeId}output.txt");
-            if (!System.IO.File.Exists(outputFilePath))
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine("[" + DateTime.Now.ToString() + "][General] GetOutputFile error: " + $"Output file no found for id: " + codeId.ToString());
-
-                return NotFound("Output file not found.");
-            }
-
-            return PhysicalFile(outputFilePath, "text/plain", Path.GetFileName(outputFilePath));
-        }
-
-        [HttpPut("update/{codeId}")]
-        public async Task<IActionResult> UpdateCode(int codeId, [FromBody] string newSourceCode)
-        {
-            if (string.IsNullOrWhiteSpace(newSourceCode))
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine($"[{DateTime.Now}][Update Subsystem] New source code for ID {codeId} is empty or null.");
-                return BadRequest("New source code cannot be empty.");
-            }
-
-            string sourceFilePath = Path.Combine(StorageDirectory, $"{codeId}.cs");
-
-            try
-            {
-                // Перезаписываем исходный файл
-                await System.IO.File.WriteAllTextAsync(sourceFilePath, newSourceCode);
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine($"[{DateTime.Now}][Update Subsystem] Source code for ID {codeId} updated successfully.");
-
-                return Ok($"Source code for ID {codeId} updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine($"[{DateTime.Now}][Update Subsystem] UpdateCode exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Failed to update source code: {ex.Message}");
-            }
-        }
-
-        [HttpPut("update-metadata/{codeId}")]
-        public async Task<IActionResult> UpdateMetadata(int codeId, [FromBody] string newMetadata)
-        {
-            if (string.IsNullOrWhiteSpace(newMetadata))
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine($"[{DateTime.Now}][Update Metadata Subsystem] New metadata for ID {codeId} is empty or null.");
-                return BadRequest("New metadata cannot be empty.");
-            }
-
-            string metadataFilePath = Path.Combine(StorageDirectory, $"{codeId}init.txt");
-
-            try
-            {
-                // Перезаписываем метафайл
-                await System.IO.File.WriteAllTextAsync(metadataFilePath, newMetadata);
-
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine($"[{DateTime.Now}][Update Metadata Subsystem] Metadata for ID {codeId} updated successfully.");
-
-                return Ok($"Metadata for ID {codeId} updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                using (StreamWriter writer = new StreamWriter("/app/code_files/logs.txt", append: true))
-                    writer.WriteLine($"[{DateTime.Now}][Update Metadata Subsystem] UpdateMetadata exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Failed to update metadata: {ex.Message}");
             }
         }
 

@@ -1,5 +1,0 @@
-The type or namespace name 'Json' does not exist in the namespace 'System.Text' (are you missing an assembly reference?)
-The name 'TestVariableTracker' does not exist in the current context
-The 'await' operator can only be used within an async method. Consider marking this method with the 'async' modifier and changing its return type to 'Task'.
-The name 'TestVariableTracker' does not exist in the current context
-The 'await' operator can only be used within an async method. Consider marking this method with the 'async' modifier and changing its return type to 'Task'.
