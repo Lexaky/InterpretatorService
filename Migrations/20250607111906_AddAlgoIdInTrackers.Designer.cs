@@ -2,6 +2,7 @@
 using InterpretatorService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InterpretatorService.Migrations
 {
     [DbContext(typeof(TestsDbContext))]
-    partial class TestsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250607111906_AddAlgoIdInTrackers")]
+    partial class AddAlgoIdInTrackers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,6 +44,8 @@ namespace InterpretatorService.Migrations
                         .HasColumnName("difficult");
 
                     b.HasKey("Step", "AlgoId");
+
+                    b.HasIndex("AlgoId");
 
                     b.ToTable("algorithmsteps", (string)null);
                 });
@@ -176,11 +181,24 @@ namespace InterpretatorService.Migrations
                         .HasColumnType("text")
                         .HasColumnName("var_type");
 
+                    b.Property<int?>("algo_id")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("algo_step")
+                        .HasColumnType("integer");
+
                     b.HasKey("Sequence");
 
-                    b.HasIndex("AlgoId", "Step");
+                    b.HasIndex("algo_step", "algo_id");
 
-                    b.ToTable("trackedvariables", (string)null);
+                    b.ToTable("trackedvariables", null, t =>
+                        {
+                            t.Property("algo_id")
+                                .HasColumnName("algo_id1");
+
+                            t.Property("algo_step")
+                                .HasColumnName("algo_step1");
+                        });
                 });
 
             modelBuilder.Entity("InterpretatorService.Models.AlgoStep", b =>
@@ -205,10 +223,8 @@ namespace InterpretatorService.Migrations
                 {
                     b.HasOne("InterpretatorService.Models.AlgoStep", null)
                         .WithMany()
-                        .HasForeignKey("AlgoId", "Step")
-                        .HasPrincipalKey("AlgoId", "Step")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("algo_step", "algo_id")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

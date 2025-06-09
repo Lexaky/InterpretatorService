@@ -91,16 +91,22 @@ namespace InterpretatorService.Data
                 .Property(v => v.Step)
                 .HasColumnName("algo_step");
 
+            // Маппинг TrackVariable
             modelBuilder.Entity<TrackVariable>()
-                .Property<int>("AlgoId") // скрытое свойство, чтобы связать внешний ключ
+                .Property(t => t.AlgoId)
                 .HasColumnName("algo_id");
 
+            // Настройка внешнего ключа
             modelBuilder.Entity<TrackVariable>()
                 .HasOne<AlgoStep>()
                 .WithMany()
-                .HasForeignKey("algo_step", "algo_id")
-                .HasPrincipalKey(s => new { s.Step, s.AlgoId })
+                .HasForeignKey(t => new { t.AlgoId, t.Step }) // Внешний ключ: algo_id, Step
+                .HasPrincipalKey(s => new { s.AlgoId, s.Step }) // Основной ключ в AlgoStep
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Настройка составного ключа для testinputdata
+            modelBuilder.Entity<InputTestData>()
+                .HasKey(t => new { t.TestId, t.VarName });
 
             // === InputTestData ===
             modelBuilder.Entity<InputTestData>()
@@ -165,6 +171,12 @@ namespace InterpretatorService.Data
                 .WithMany()
                 .HasForeignKey(t => t.AlgoId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Test>().ToTable("tests");
+            modelBuilder.Entity<InputTestData>().ToTable("testinputdata");
+            modelBuilder.Entity<TrackVariable>().ToTable("trackedvariables");
+            modelBuilder.Entity<Algorithm>().ToTable("algorithms");
+            modelBuilder.Entity<AlgoStep>().ToTable("algorithmsteps");
         }
     }
 }

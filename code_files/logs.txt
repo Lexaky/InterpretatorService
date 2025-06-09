@@ -1,1 +1,8 @@
 [06/06/2025 16:45:16][Execute Subsystem] ExecuteCode result: CodeId=2, IsSuccessful=True, ErrorOutput=
+[06/07/2025 10:55:25][UpdateValues] Successfully created test: test_id=1, algo_id=2, variables=[numbers=5,10,15,20,25]
+[06/07/2025 10:56:22][UpdateValues] Successfully created test: test_id=2, algo_id=2, variables=[numbers=5,10,15]
+[06/07/2025 10:57:12][UpdateValues] Successfully created test: test_id=3, algo_id=2, variables=[numbers=10,15,20,25, sum=5]
+[06/07/2025 11:51:49][Execute Subsystem] ExecuteCode result: CodeId=4, IsSuccessful=False, ErrorOutput=; expected
+[06/07/2025 16:12:35][UpdateValues] Successfully created test: test_id=4, algo_id=5, variables=[arr=5,4,3,2,1]
+[06/07/2025 16:12:59][UpdateValues] Successfully created test: test_id=5, algo_id=5, variables=[arr=3,2,1]
+[06/07/2025 16:13:23][UpdateValues] Successfully created test: test_id=6, algo_id=5, variables=[arr=5,6,4]

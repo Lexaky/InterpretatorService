@@ -848,15 +848,49 @@ namespace InterpretatorService.Controllers
             }
         }
 
-
         [HttpPost("update-values/{codeId}")]
         public async Task<IActionResult> UpdateVariableValues(int codeId, [FromBody] List<VariableUpdateDto> updates)
         {
             try
             {
+                // Проверка входных данных
+                if (updates == null || !updates.Any())
+                {
+                    string error = "Список обновлений переменных пуст или не предоставлен.";
+                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                        $"[{DateTime.Now}][UpdateValues] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Проверка уникальности VariableName в updates
+                var duplicateVarNames = updates.GroupBy(u => u.VariableName)
+                                              .Where(g => g.Count() > 1)
+                                              .Select(g => g.Key);
+                if (duplicateVarNames.Any())
+                {
+                    string error = $"Обнаружены дублирующиеся имена переменных: {string.Join(", ", duplicateVarNames)}.";
+                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                        $"[{DateTime.Now}][UpdateValues] Error: {error}\n");
+                    return BadRequest(error);
+                }
+
+                // Проверка существования алгоритма в базе данных
+                if (!await _dbContext.Algorithms.AnyAsync(a => a.AlgoId == codeId))
+                {
+                    string error = $"Алгоритм с ID {codeId} не найден в базе данных.";
+                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                        $"[{DateTime.Now}][UpdateValues] Error: {error}\n");
+                    return NotFound(error);
+                }
+
                 var codeFilePath = Path.Combine(StorageDirectory, $"{codeId}.cs");
                 if (!System.IO.File.Exists(codeFilePath))
-                    return NotFound($"Code file with ID {codeId} not found.");
+                {
+                    string error = $"Файл кода с ID {codeId} не найден.";
+                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                        $"[{DateTime.Now}][UpdateValues] Error: {error}\n");
+                    return NotFound(error);
+                }
 
                 var codeLines = await System.IO.File.ReadAllLinesAsync(codeFilePath);
                 var typeMap = new Dictionary<string, (string Type, int Rank, int Line, int LineCount)>();
@@ -908,15 +942,30 @@ namespace InterpretatorService.Controllers
                 {
                     int lineNumber = updateGroup.Key;
                     if (lineNumber > codeLines.Length)
-                        return BadRequest($"Line {lineNumber} is out of range.");
+                    {
+                        string error = $"Строка {lineNumber} выходит за пределы файла.";
+                        await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                            $"[{DateTime.Now}][UpdateValues] Error: {error}\n");
+                        return BadRequest(error);
+                    }
 
                     foreach (var update in updateGroup)
                     {
                         if (!typeMap.TryGetValue(update.VariableName, out var typeInfo))
-                            return BadRequest($"Variable {update.VariableName} not found in code.");
+                        {
+                            string error = $"Переменная {update.VariableName} не найдена в коде.";
+                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                                $"[{DateTime.Now}][UpdateValues] Error: {error}\n");
+                            return BadRequest(error);
+                        }
 
                         if (typeInfo.Line != lineNumber)
-                            return BadRequest($"Variable {update.VariableName} is not assigned at line {lineNumber}.");
+                        {
+                            string error = $"Переменная {update.VariableName} не инициализируется на строке {lineNumber}.";
+                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                                $"[{DateTime.Now}][UpdateValues] Error: {error}\n");
+                            return BadRequest(error);
+                        }
 
                         string newValue;
                         if (typeInfo.Rank == 0)
@@ -942,7 +991,12 @@ namespace InterpretatorService.Controllers
                         var originalLine = codeLines[typeInfo.Line - 1];
                         var assignIndex = originalLine.IndexOf('=');
                         if (assignIndex < 0)
-                            return BadRequest($"No assignment found for {update.VariableName} at line {lineNumber}.");
+                        {
+                            string error = $"Оператор присваивания не найден для переменной {update.VariableName} на строке {lineNumber}.";
+                            await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                                $"[{DateTime.Now}][UpdateValues] Error: {error}\n");
+                            return BadRequest(error);
+                        }
 
                         // Заменяем первую строку инициализации новым значением
                         newLines[typeInfo.Line - 1] = originalLine.Substring(0, assignIndex + 1) + $" {newValue};";
@@ -960,11 +1014,67 @@ namespace InterpretatorService.Controllers
                 while (newLines.Count < codeLines.Length)
                     newLines.Add("");
 
-                int testId = new Random().Next(100000, 999999);
-                var testFilePath = Path.Combine(StorageDirectory, $"test{codeId}_{testId}.cs");
-                await System.IO.File.WriteAllTextAsync(testFilePath, string.Join("\n", newLines));
+                // Начинаем транзакцию для операций с базой данных
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
-                return Ok(new { TestId = testId });
+                try
+                {
+                    // Создаём запись в таблице tests
+                    var test = new Test
+                    {
+                        AlgoId = codeId,
+                        Description = "",
+                        TestName = "",
+                        difficult = 0.5f,
+                        SolvedCount = 0,
+                        UnsolvedCount = 0
+                    };
+
+                    _dbContext.Tests.Add(test);
+                    await _dbContext.SaveChangesAsync();
+
+                    // Получаем сгенерированный TestId
+                    int testId = test.TestId;
+
+                    // Создаём записи в таблице testinputdata
+                    foreach (var update in updates)
+                    {
+                        if (!typeMap.TryGetValue(update.VariableName, out var typeInfo))
+                            continue; // Пропускаем, если переменная не найдена (уже проверено выше)
+
+                        var inputData = new InputTestData
+                        {
+                            TestId = testId,
+                            VarName = update.VariableName,
+                            VarValue = update.Value,
+                            VarType = typeInfo.Type,
+                            LineNumber = update.LineNumber
+                        };
+
+                        _dbContext.InputData.Add(inputData);
+                    }
+
+                    await _dbContext.SaveChangesAsync();
+
+                    // Сохраняем тестовый файл
+                    var testFilePath = Path.Combine(StorageDirectory, $"test{codeId}_{testId}.cs");
+                    await System.IO.File.WriteAllTextAsync(testFilePath, string.Join("\n", newLines));
+
+                    // Фиксируем транзакцию
+                    await transaction.CommitAsync();
+
+                    // Логируем успешное выполнение
+                    await System.IO.File.AppendAllTextAsync(Path.Combine(StorageDirectory, "logs.txt"),
+                        $"[{DateTime.Now}][UpdateValues] Successfully created test: test_id={testId}, algo_id={codeId}, variables=[{string.Join(", ", updates.Select(u => $"{u.VariableName}={u.Value}"))}]\n");
+
+                    return Ok(new { TestId = testId });
+                }
+                catch
+                {
+                    // Откатываем транзакцию при ошибке
+                    await transaction.RollbackAsync();
+                    throw; // Перебрасываем исключение для обработки во внешнем catch
+                }
             }
             catch (Exception ex)
             {
@@ -973,7 +1083,6 @@ namespace InterpretatorService.Controllers
                 return StatusCode(500, $"Server error: {ex.Message}");
             }
         }
-
 
         [HttpPost("execute-test/{codeId}/{testId}")]
         public async Task<IActionResult> ExecuteTest(int codeId, int testId)
@@ -1077,14 +1186,14 @@ namespace InterpretatorService.Controllers
                     }
                 }
                 var userSteps = userStepsData.Select(x => x.Step).Distinct().ToList();
-                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Read {userStepsData.Count} user data entries, {userSteps.Count} unique steps\n");
+                System.IO.File.AppendAllText(debugPath, $"[{DateTime.Now}][SubstituteValues] Read {userStepsData.Count} user data entries, {userSteps.Count} unique steps\n");
 
                 // Сохраняем пользовательский файл
                 using (var stream = new FileStream(userDataPath, FileMode.Create, FileAccess.Write))
                 {
                     await userDataFile.CopyToAsync(stream);
                 }
-                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][SubstituteValues] Saved user data to {userDataPath}\n");
+                System.IO.File.AppendAllText(debugPath, $"[{DateTime.Now}][SubstituteValues] Saved user data to {userDataPath}\n");
 
                 // Создаём/очищаем файлы values.txt и mismatches.txt
                 System.IO.File.WriteAllText(valuesPath, string.Empty);
@@ -1298,8 +1407,6 @@ namespace InterpretatorService.Controllers
             public string Value { get; set; }
         }
 
-
-
         // Структура для хранения данных о точке трекинга
         private struct TrackingPoint
         {
@@ -1309,7 +1416,7 @@ namespace InterpretatorService.Controllers
         }
 
         [HttpPost("modify-test/{codeId}/{testId}")]
-        public async Task<IActionResult> ModifyTest(int codeId, int testId, IFormFile trackerInsertLines)
+        public async Task<IActionResult> ModifyTest(int codeId, int testId)
         {
             try
             {
@@ -1317,6 +1424,14 @@ namespace InterpretatorService.Controllers
                 string sourceFilePath = $"/app/code_files/test{codeId}_{testId}.cs";
                 string modifiedFilePath = $"/app/code_files/test{codeId}_{testId}modified.cs";
                 string debugPath = "/app/code_files/debug.txt";
+
+                // Проверяем отсутствие модифицированного файла
+                if (System.IO.File.Exists(modifiedFilePath))
+                {
+                    string error = $"Модифицированный файл {modifiedFilePath} уже существует.";
+                    await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Error: {error}\n");
+                    return BadRequest(error);
+                }
 
                 // Проверяем существование исходного файла
                 if (!System.IO.File.Exists(sourceFilePath))
@@ -1330,42 +1445,37 @@ namespace InterpretatorService.Controllers
                 string[] sourceLines = await System.IO.File.ReadAllLinesAsync(sourceFilePath);
                 await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Read source file: {sourceFilePath}, lines: {sourceLines.Length}\n");
 
-                // Читаем .txt файл с трекерами
-                if (trackerInsertLines == null || trackerInsertLines.Length == 0)
+                // Читаем трекеры из таблицы TrackedVariables
+                var trackers = await _dbContext.TrackVariables
+                    .Where(t => t.AlgoId == codeId)
+                    .GroupBy(t => t.LineNumber)
+                    .Select(g => new
+                    {
+                        LineNumber = g.Key,
+                        Variables = g.Select(v => v.VarName).ToArray()
+                    })
+                    .ToListAsync();
+
+                var trackerList = trackers.Select(t => (t.LineNumber, t.Variables)).ToList();
+                if (!trackerList.Any())
                 {
-                    string error = "Файл трекеров не предоставлен или пуст.";
+                    string error = $"Трекеры для algo_id {codeId} не найдены в таблице TrackedVariables.";
                     await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Error: {error}\n");
                     return BadRequest(error);
                 }
-
-                var trackers = new List<(int LineNumber, string[] Variables)>();
-                using (var stream = trackerInsertLines.OpenReadStream())
-                using (var reader = new StreamReader(stream))
-                {
-                    string line;
-                    while ((line = await reader.ReadLineAsync()) != null)
-                    {
-                        string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length >= 2 && int.TryParse(parts[0], out int lineNumber))
-                        {
-                            string[] variables = parts.Skip(1).ToArray();
-                            trackers.Add((lineNumber, variables));
-                        }
-                    }
-                }
-                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Read trackers, count: {trackers.Count}\n");
+                await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Read trackers from TrackedVariables, count: {trackerList.Count}\n");
 
                 // Сортируем трекеры по номеру строки
-                trackers.Sort((a, b) => a.LineNumber.CompareTo(b.LineNumber));
+                trackerList.Sort((a, b) => a.LineNumber.CompareTo(b.LineNumber));
 
                 // Собираем библиотеки
                 var requiredUsings = new HashSet<string>
-            {
-                "using System;",
-                "using System.IO;",
-                "using System.Collections.Generic;",
-                "using System.Linq;"
-            };
+        {
+            "using System;",
+            "using System.IO;",
+            "using System.Collections.Generic;",
+            "using System.Linq;"
+        };
                 var existingUsings = sourceLines
                     .TakeWhile(line => line.Trim().StartsWith("using "))
                     .Select(line => line.Trim())
@@ -1395,6 +1505,7 @@ namespace InterpretatorService.Controllers
                     await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Error: {error}\n");
                     return BadRequest(error);
                 }
+
                 await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Found Main body start at line: {mainBodyStartLine}\n");
 
                 // Парсим объявления переменных
@@ -1404,7 +1515,7 @@ namespace InterpretatorService.Controllers
                 // Создаём новый список строк
                 var modifiedLines = new List<string>();
                 int addedLines = 0; // Счётчик добавленных строк (Initialize и трекеры)
-                bool[] trackerInserted = new bool[trackers.Count]; // Отслеживаем вставленные трекеры
+                bool[] trackerInserted = new bool[trackerList.Count]; // Отслеживаем вставленные трекеры
 
                 // Добавляем библиотеки
                 modifiedLines.AddRange(newUsings);
@@ -1412,6 +1523,7 @@ namespace InterpretatorService.Controllers
                     modifiedLines.Add("");
                 modifiedLines.AddRange(sourceLines.TakeWhile(line => line.Trim().StartsWith("using ")));
                 int stepCounter = 0;
+
                 // Обрабатываем строки исходного кода
                 for (int currentLine = 0; currentLine < sourceLines.Length; currentLine++)
                 {
@@ -1431,13 +1543,13 @@ namespace InterpretatorService.Controllers
 
                     // Добавляем текущую строку
                     modifiedLines.Add(sourceLines[currentLine]);
-                    
+
                     // Проверяем, нужно ли вставить трекер после текущей строки
-                    for (int i = 0; i < trackers.Count; i++)
+                    for (int i = 0; i < trackerList.Count; i++)
                     {
                         if (trackerInserted[i]) continue; // Пропускаем уже вставленные трекеры
 
-                        var (lineNumber, variables) = trackers[i];
+                        var (lineNumber, variables) = trackerList[i];
                         // Проверяем, является ли текущая строка целевой (с учётом сдвига от using и Initialize)
                         int sourceLineNumber = currentLine + 1; // Номер строки в исходном файле (1-based)
                         if (sourceLineNumber == lineNumber)
@@ -1464,8 +1576,6 @@ namespace InterpretatorService.Controllers
                 await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Added TestVariableTracker class\n");
 
                 // Записываем в модифицированный файл
-                if (System.IO.File.Exists(modifiedFilePath))
-                    System.IO.File.Delete(modifiedFilePath);
                 await System.IO.File.WriteAllLinesAsync(modifiedFilePath, modifiedLines);
                 await System.IO.File.AppendAllTextAsync(debugPath, $"[{DateTime.Now}][ModifyTest] Created modified file: {modifiedFilePath}, lines: {modifiedLines.Count}\n");
 
@@ -1476,6 +1586,54 @@ namespace InterpretatorService.Controllers
                 await System.IO.File.AppendAllTextAsync("/app/code_files/debug.txt", $"[{DateTime.Now}][ModifyTest] Error: {ex.Message}\n");
                 return BadRequest($"Ошибка при модификации кода: {ex.Message}");
             }
+        }
+
+
+        [HttpGet("tests/{testId}")]
+        public async Task<IActionResult> GetTestById(int testId)
+        {
+            var test = await _dbContext.Tests
+                .Where(t => t.TestId == testId)
+                .Select(t => new { t.TestId, t.AlgoId })
+                .FirstOrDefaultAsync();
+
+            if (test == null)
+                return NotFound($"Test with ID {testId} not found.");
+
+            return Ok(test);
+        }
+
+        // GET: api/Code/variables/{algoId}
+        [HttpGet("getVariables/{algoId}")]
+        public async Task<IActionResult> GetTrackedVariables(int algoId)
+        {
+            var variables = await _dbContext.TrackVariables
+                .Where(v => v.AlgoId == algoId)
+                .Select(v => new
+                {
+                    v.Sequence,
+                    v.LineNumber,
+                    v.VarName,
+                    v.VarType,
+                    v.Step
+                })
+                .ToListAsync();
+
+            return Ok(variables);
+        }
+
+        // GET: api/Code/steps/{algoId}
+        [HttpGet("steps/{algoId}")]
+        public async Task<IActionResult> GetAlgorithmSteps(int algoId)
+        {
+            var steps = await _dbContext.TrackVariables
+                .Where(v => v.AlgoId == algoId)
+                .Select(v => v.Step)
+                .Distinct()
+                .OrderBy(s => s)
+                .ToListAsync();
+
+            return Ok(steps);
         }
 
         private static Dictionary<string, string> ParseVariableTypes(string[] sourceLines)
