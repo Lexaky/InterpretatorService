@@ -1636,6 +1636,156 @@ namespace InterpretatorService.Controllers
             return Ok(steps);
         }
 
+        private async Task LogError(string message)
+        {
+            await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][CodeController] Error: {message}\n");
+        }
+
+        private async Task LogSuccess(string message)
+        {
+            await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][CodeController] Success: {message}\n");
+        }
+
+        [HttpGet("algorithm-difficulty")]
+        public async Task<IActionResult> GetAlgorithmDifficulty(int algoId)
+        {
+            try
+            {
+                var tests = await _dbContext.Tests
+                    .Where(t => t.AlgoId == algoId)
+                    .ToListAsync();
+
+                if (!tests.Any())
+                {
+                    await LogError($"No tests found for algoId={algoId}");
+                    return BadRequest("No tests found for this algorithm.");
+                }
+
+                float algorithmDifficulty = tests.Average(t => t.difficult);
+                await LogSuccess($"Algorithm difficulty calculated for algoId={algoId}: {algorithmDifficulty}");
+
+                return Ok(new { AlgoId = algoId, Difficulty = algorithmDifficulty });
+            }
+            catch (Exception ex)
+            {
+                await LogError($"Exception in GetAlgorithmDifficulty: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("test-step-responses/{testId}")]
+        public async Task<IActionResult> GetTestStepResponses(int testId)
+        {
+            try
+            {
+                var testExists = await _dbContext.Tests.AnyAsync(t => t.TestId == testId);
+                if (!testExists)
+                {
+                    await LogError($"Test not found: testId={testId}");
+                    return BadRequest("Test not found.");
+                }
+
+                var stepResponses = await _dbContext.TestStepResponses
+                    .Where(tsr => tsr.TestId == testId)
+                    .Select(tsr => new TestStepResponseDto
+                    {
+                        TestId = tsr.TestId,
+                        AlgoStep = tsr.AlgoStep,
+                        CorrectCount = tsr.CorrectCount,
+                        IncorrectCount = tsr.IncorrectCount
+                    })
+                    .ToListAsync();
+
+                if (!stepResponses.Any())
+                {
+                    await LogError($"No step responses found for testId={testId}");
+                    return NotFound("No step responses found for this test.");
+                }
+
+                await LogSuccess($"Retrieved step responses for testId={testId}");
+                return Ok(stepResponses);
+            }
+            catch (Exception ex)
+            {
+                await LogError($"Exception in GetTestStepResponses: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("update-step-responses")]
+        public async Task<IActionResult> UpdateStepResponses([FromBody] UpdateStepResponseDto request)
+        {
+            try
+            {
+                var test = await _dbContext.Tests.FirstOrDefaultAsync(t => t.TestId == request.TestId);
+                if (test == null || test.AlgoId != request.AlgoId)
+                {
+                    //_logger.LogWarning($"Test not found or AlgoId mismatch: testId={request.TestId}, algoId={request.AlgoId}");
+                    return BadRequest($"Test not found or AlgoId mismatch: testId={request.TestId}, algoId={request.AlgoId}");
+                }
+
+                foreach (var stepResult in request.StepResults)
+                {
+                    var stepResponse = await _dbContext.TestStepResponses
+                        .FirstOrDefaultAsync(tsr => tsr.TestId == request.TestId && tsr.AlgoStep == stepResult.AlgoStep && tsr.AlgoId == test.AlgoId);
+                    if (stepResponse == null)
+                    {
+                        stepResponse = new TestStepResponse
+                        {
+                            TestId = request.TestId,
+                            AlgoStep = stepResult.AlgoStep,
+                            AlgoId = test.AlgoId,
+                            CorrectCount = stepResult.IsCorrect ? 1 : 0,
+                            IncorrectCount = stepResult.IsCorrect ? 0 : 1
+                        };
+                        _dbContext.TestStepResponses.Add(stepResponse);
+                    }
+                    else
+                    {
+                        stepResponse.CorrectCount += stepResult.IsCorrect ? 1 : 0;
+                        stepResponse.IncorrectCount += stepResult.IsCorrect ? 0 : 1;
+                        _dbContext.TestStepResponses.Update(stepResponse);
+                    }
+                }
+
+                await _dbContext.SaveChangesAsync();
+                //_logger.LogInformation($"Updated step responses for testId={request.TestId}");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                //_logger.LogError($"Error updating step responses for testId={request.TestId}: {ex.Message}, InnerException: {ex.InnerException?.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpPut("tests/{testId}")]
+        public async Task<IActionResult> UpdateTest(int testId, [FromBody] UpdateTestDto request)
+        {
+            try
+            {
+                var test = await _dbContext.Tests.FirstOrDefaultAsync(t => t.TestId == testId);
+                if (test == null)
+                {
+                    await LogError($"Test not found: testId={testId}");
+                    return BadRequest("Test not found.");
+                }
+
+                test.SolvedCount = request.SolvedCount;
+                test.UnsolvedCount = request.UnsolvedCount;
+                await _dbContext.SaveChangesAsync();
+                await LogSuccess($"Updated test counts for testId={testId}");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await LogError($"Exception in UpdateTest: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         private static Dictionary<string, string> ParseVariableTypes(string[] sourceLines)
         {
             var variableTypes = new Dictionary<string, string>();

@@ -2,6 +2,7 @@
 using InterpretatorService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InterpretatorService.Migrations
 {
     [DbContext(typeof(TestsDbContext))]
-    partial class TestsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250618081224_AddTestStepResponsesTable")]
+    partial class AddTestStepResponsesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -164,7 +167,7 @@ namespace InterpretatorService.Migrations
 
                     b.HasKey("TestId", "AlgoStep", "AlgoId");
 
-                    b.HasIndex("AlgoId");
+                    b.HasIndex("AlgoStep", "AlgoId");
 
                     b.ToTable("teststepresponses", (string)null);
                 });
@@ -227,15 +230,15 @@ namespace InterpretatorService.Migrations
 
             modelBuilder.Entity("InterpretatorService.Models.TestStepResponse", b =>
                 {
-                    b.HasOne("InterpretatorService.Models.Algorithm", null)
-                        .WithMany()
-                        .HasForeignKey("AlgoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("InterpretatorService.Models.Test", null)
                         .WithMany()
                         .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InterpretatorService.Models.AlgoStep", null)
+                        .WithMany()
+                        .HasForeignKey("AlgoStep", "AlgoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

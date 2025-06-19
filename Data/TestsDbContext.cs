@@ -14,6 +14,7 @@ namespace InterpretatorService.Data
         public DbSet<InputTestData> InputData { get; set; }
         public DbSet<Test> Tests { get; set; }
         public DbSet <TrackVariable> TrackVariables { get; set; }
+        public DbSet<TestStepResponse> TestStepResponses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -172,11 +173,25 @@ namespace InterpretatorService.Data
                 .HasForeignKey(t => t.AlgoId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<TestStepResponse>()
+            .HasKey(tsr => new { tsr.TestId, tsr.AlgoStep, tsr.AlgoId });
+
+            modelBuilder.Entity<TestStepResponse>()
+                .HasOne<Test>()
+                .WithMany()
+                .HasForeignKey(ts => ts.TestId);
+
+            modelBuilder.Entity<TestStepResponse>()
+                .HasOne<Algorithm>()
+                .WithMany()
+                .HasForeignKey(a => a.AlgoId);
+
             modelBuilder.Entity<Test>().ToTable("tests");
             modelBuilder.Entity<InputTestData>().ToTable("testinputdata");
             modelBuilder.Entity<TrackVariable>().ToTable("trackedvariables");
             modelBuilder.Entity<Algorithm>().ToTable("algorithms");
             modelBuilder.Entity<AlgoStep>().ToTable("algorithmsteps");
+            modelBuilder.Entity<TestStepResponse>().ToTable("teststepresponses");
         }
     }
 }
