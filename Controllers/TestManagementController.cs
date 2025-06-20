@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using InterpretatorService.DTOs;
 
 namespace InterpretatorService.Controllers;
 
@@ -66,10 +68,11 @@ public class TestManagementController : ControllerBase
     }
 
     [HttpPut("modify-test/{testId}")]
-    public async Task<IActionResult> ModifyTest(int testId, [FromBody] dynamic update)
+    public async Task<IActionResult> ModifyTest(int testId, [FromBody] UpdateTestDto update)
     {
         try
         {
+            _logger.LogInformation($"Received modify-test request: testId={testId}, update={JsonSerializer.Serialize(update)}");
             var test = await _context.Tests.FirstOrDefaultAsync(t => t.TestId == testId);
             if (test == null)
             {
@@ -77,22 +80,19 @@ public class TestManagementController : ControllerBase
                 return NotFound($"Test not found: testId={testId}");
             }
 
-            if (update.difficult != null)
+            test.difficult = update.difficult;
+            if (update.SolvedCount.HasValue)
             {
-                test.difficult = (float)update.difficult;
+                test.SolvedCount = update.SolvedCount.Value;
             }
-            if (update.SolvedCount != null)
+            if (update.UnsolvedCount.HasValue)
             {
-                test.SolvedCount = (int)update.SolvedCount;
-            }
-            if (update.UnsolvedCount != null)
-            {
-                test.UnsolvedCount = (int)update.UnsolvedCount;
+                test.UnsolvedCount = update.UnsolvedCount.Value;
             }
 
             _context.Tests.Update(test);
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"Updated test: testId={testId}");
+            _logger.LogInformation($"Updated test: testId={testId}, difficult={test.difficult}");
             return Ok();
         }
         catch (Exception ex)
@@ -123,26 +123,32 @@ public class TestManagementController : ControllerBase
     }
 
     [HttpPut("modify-algo-step/{algoId}/{step}")]
-    public async Task<IActionResult> ModifyAlgoStep(int algoId, int step, [FromBody] dynamic update)
+    public async Task<IActionResult> ModifyAlgoStep(int algoId, int step, [FromBody] UpdateAlgoStepDto update)
     {
         try
         {
+            _logger.LogInformation($"Received modify-algo-step request: algoId={algoId}, step={step}, update={JsonSerializer.Serialize(update)}");
             var algoStep = await _context.AlgoSteps
                 .FirstOrDefaultAsync(a => a.AlgoId == algoId && a.Step == step);
             if (algoStep == null)
             {
-                _logger.LogWarning($"Algo step not found: algoId={algoId}, step={step}");
-                return NotFound($"Algo step not found: algoId={algoId}, step={step}");
+                algoStep = new AlgoStep
+                {
+                    AlgoId = algoId,
+                    Step = step,
+                    Difficult = update.Difficult
+                };
+                _context.AlgoSteps.Add(algoStep);
+                _logger.LogInformation($"Created new algo step: algoId={algoId}, step={step}");
             }
-
-            if (update.Difficult != null)
+            else
             {
-                algoStep.Difficult = (float)update.Difficult;
+                algoStep.Difficult = update.Difficult;
+                _context.AlgoSteps.Update(algoStep);
+                _logger.LogInformation($"Updated algo step: algoId={algoId}, step={step}, difficult={algoStep.Difficult}");
             }
 
-            _context.AlgoSteps.Update(algoStep);
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"Updated algo step: algoId={algoId}, step={step}");
             return Ok();
         }
         catch (Exception ex)
@@ -175,6 +181,7 @@ public class TestManagementController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Received modify-step-responses request: testId={testId}, stepResponses={JsonSerializer.Serialize(stepResponses)}");
             var test = await _context.Tests.FirstOrDefaultAsync(t => t.TestId == testId);
             if (test == null)
             {
@@ -184,25 +191,33 @@ public class TestManagementController : ControllerBase
 
             foreach (var stepResponse in stepResponses)
             {
+                if (stepResponse.AlgoId != test.AlgoId)
+                {
+                    _logger.LogWarning($"AlgoId mismatch: testId={testId}, expected AlgoId={test.AlgoId}, received AlgoId={stepResponse.AlgoId}");
+                    continue;
+                }
+
                 var existing = await _context.TestStepResponses
                     .FirstOrDefaultAsync(tsr => tsr.TestId == testId && tsr.AlgoStep == stepResponse.AlgoStep && tsr.AlgoId == test.AlgoId);
                 if (existing == null)
                 {
                     var newStepResponse = new TestStepResponse
                     {
-                        TestId = stepResponse.TestId,
-                        AlgoStep = stepResponse.AlgoStep,
+                        TestId = testId,
                         AlgoId = test.AlgoId,
+                        AlgoStep = stepResponse.AlgoStep,
                         CorrectCount = stepResponse.CorrectCount,
                         IncorrectCount = stepResponse.IncorrectCount
                     };
                     _context.TestStepResponses.Add(newStepResponse);
+                    _logger.LogInformation($"Added new step response: testId={testId}, algoStep={stepResponse.AlgoStep}, correct={stepResponse.CorrectCount}, incorrect={stepResponse.IncorrectCount}");
                 }
                 else
                 {
-                    existing.CorrectCount = stepResponse.CorrectCount;
-                    existing.IncorrectCount = stepResponse.IncorrectCount;
+                    existing.CorrectCount += stepResponse.CorrectCount;
+                    existing.IncorrectCount += stepResponse.IncorrectCount;
                     _context.TestStepResponses.Update(existing);
+                    _logger.LogInformation($"Updated step response: testId={testId}, algoStep={stepResponse.AlgoStep}, correct={existing.CorrectCount}, incorrect={existing.IncorrectCount}");
                 }
             }
             await _context.SaveChangesAsync();
@@ -215,4 +230,21 @@ public class TestManagementController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+
+    public class UpdateAlgoStepDto
+    {
+        public int AlgoId { get; set; }
+        public int Step { get; set; }
+        public float Difficult { get; set; }
+    }
+
+    public class UpdateTestDto
+    {
+        public int TestId { get; set; }
+        public float difficult { get; set; }
+        public int? SolvedCount { get; set; }
+        public int? UnsolvedCount { get; set; }
+    }
 }
+
