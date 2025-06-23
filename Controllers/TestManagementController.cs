@@ -231,6 +231,69 @@ public class TestManagementController : ControllerBase
         }
     }
 
+    [HttpGet("fetch-test-details/{testId}")]
+    public async Task<IActionResult> FetchTestDetails(int testId)
+    {
+        try
+        {
+            // Получение данных теста
+            var test = await _context.Tests
+                .FirstOrDefaultAsync(t => t.TestId == testId);
+
+            if (test == null)
+            {
+                _logger.LogWarning($"Test not found: testId={testId}");
+                return NotFound($"Test not found: testId={testId}");
+            }
+
+            // Получение данных алгоритма
+            var algorithm = await _context.Algorithms
+                .FirstOrDefaultAsync(a => a.AlgoId == test.AlgoId);
+
+            if (algorithm == null)
+            {
+                _logger.LogWarning($"Algorithm not found for algoId={test.AlgoId}, testId={testId}");
+                return NotFound($"Algorithm not found for testId={testId}");
+            }
+
+            // Получение входных данных теста
+            var inputTestData = await _context.InputData
+                .Where(itd => itd.TestId == testId)
+                .ToListAsync();
+
+            // Получение шагов алгоритма
+            var algoSteps = await _context.AlgoSteps
+                .Where(a => a.AlgoId == test.AlgoId)
+                .ToListAsync();
+
+            // Формирование ответа
+            var testDetails = new TestDetailsDto
+            {
+                Test = test,
+                Algorithm = algorithm,
+                InputTestData = inputTestData,
+                AlgoSteps = algoSteps
+            };
+
+            _logger.LogInformation($"Fetched test details: testId={testId}, algoId={test.AlgoId}, inputDataCount={inputTestData.Count}, algoStepsCount={algoSteps.Count}");
+            _logger.LogDebug($"Test details response: {JsonSerializer.Serialize(testDetails)}");
+            return Ok(testDetails);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error fetching test details for testId={testId}: {ex.Message}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    public class TestDetailsDto
+    {
+        public Test Test { get; set; } = new Test();
+        public Algorithm Algorithm { get; set; } = new Algorithm();
+        public List<InputTestData> InputTestData { get; set; } = new List<InputTestData>();
+        public List<AlgoStep> AlgoSteps { get; set; } = new List<AlgoStep>();
+    }
+
 
     public class UpdateAlgoStepDto
     {
