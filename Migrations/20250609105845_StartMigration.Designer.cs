@@ -2,6 +2,7 @@
 using InterpretatorService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InterpretatorService.Migrations
 {
     [DbContext(typeof(TestsDbContext))]
-    partial class TestsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250609105845_StartMigration")]
+    partial class StartMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -145,30 +148,6 @@ namespace InterpretatorService.Migrations
                     b.ToTable("tests", (string)null);
                 });
 
-            modelBuilder.Entity("InterpretatorService.Models.TestStepResponse", b =>
-                {
-                    b.Property<int>("TestId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AlgoStep")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AlgoId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CorrectCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("IncorrectCount")
-                        .HasColumnType("integer");
-
-                    b.HasKey("TestId", "AlgoStep", "AlgoId");
-
-                    b.HasIndex("AlgoId");
-
-                    b.ToTable("teststepresponses", (string)null);
-                });
-
             modelBuilder.Entity("InterpretatorService.Models.TrackVariable", b =>
                 {
                     b.Property<int>("Sequence")
@@ -216,35 +195,11 @@ namespace InterpretatorService.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("InterpretatorService.Models.InputTestData", b =>
-                {
-                    b.HasOne("InterpretatorService.Models.Test", null)
-                        .WithMany()
-                        .HasForeignKey("TestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("InterpretatorService.Models.Test", b =>
                 {
                     b.HasOne("InterpretatorService.Models.Algorithm", null)
                         .WithMany()
                         .HasForeignKey("AlgoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("InterpretatorService.Models.TestStepResponse", b =>
-                {
-                    b.HasOne("InterpretatorService.Models.Algorithm", null)
-                        .WithMany()
-                        .HasForeignKey("AlgoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("InterpretatorService.Models.Test", null)
-                        .WithMany()
-                        .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

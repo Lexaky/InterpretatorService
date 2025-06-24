@@ -4,14 +4,22 @@ class Program
 {
     static void Main(string []args)
     {
-        int[] numbers = { 5, 10, 15 };
-        int sum = 0;
+        int[] arr = { 5, 3, 8,
+         1, 4 };
 
-        foreach (int number in numbers)
+        for (int i = 0; i < arr.Length - 1; i++)
         {
-            sum += number;
+            for (int j = 0; j < arr.Length - i - 1; j++)
+            {
+                if (arr[j] > arr[j + 1])
+                {
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
         }
 
-        Console.WriteLine($"Сумма: {sum}");
+        Console.WriteLine("Отсортированный массив: " + string.Join(", ", arr));
     }
 }

@@ -20,6 +20,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Reflection;
+using System.ComponentModel.DataAnnotations;
 
 namespace InterpretatorService.Controllers
 {
@@ -316,6 +318,17 @@ namespace InterpretatorService.Controllers
                     System.IO.File.Delete(codeFilePath);
                 }
 
+                // Удаляем файл картинки, если она существует
+                if (System.IO.File.Exists(Path.Combine(StorageDirectory, $"{algoId}.jpg")))
+                {
+                    System.IO.File.Delete(Path.Combine(StorageDirectory, $"{algoId}.jpg"));
+                }
+
+                if (System.IO.File.Exists(Path.Combine(StorageDirectory, $"{algoId}.jpeg")))
+                {
+                    System.IO.File.Delete(Path.Combine(StorageDirectory, $"{algoId}.jpeg"));
+                }
+
                 await System.IO.File.AppendAllTextAsync(_debugLogPath, $"[{DateTime.Now}][DeleteAlgorithm] Successfully deleted algorithm: algo_id={algoId}, code_path={codeFilePath}\n");
 
                 return Ok("Алгоритм успешно удалён.");
@@ -520,6 +533,7 @@ namespace InterpretatorService.Controllers
                 {
                     Output = codeModel.StandardOutput ?? "",
                     Error = codeModel.ErrorOutput ?? "",
+                    Warning = codeModel.WarningOutput ?? "",
                     ExecutionTime = stopwatch.ElapsedMilliseconds,
                     IsSuccessful = codeModel.IsSuccessful
                 };
@@ -1626,11 +1640,14 @@ namespace InterpretatorService.Controllers
         [HttpGet("steps/{algoId}")]
         public async Task<IActionResult> GetAlgorithmSteps(int algoId)
         {
-            var steps = await _dbContext.TrackVariables
+            var steps = await _dbContext.AlgoSteps
                 .Where(v => v.AlgoId == algoId)
-                .Select(v => v.Step)
-                .Distinct()
-                .OrderBy(s => s)
+                .Select(v => new
+                {
+                    v.Step,
+                    v.Description,
+                    v.Difficult,
+                })
                 .ToListAsync();
 
             return Ok(steps);
@@ -1845,6 +1862,458 @@ namespace InterpretatorService.Controllers
                 $"[{DateTime.Now}][ModifyTest] Warning: Type not found for variable {variableName}, using (int)\n");
             return "(int)"; // По умолчанию
         }
+
+        // Список алгоритмов (Id и Имя)
+        [HttpGet("algorithms")]
+        public async Task<IActionResult> GetAllAlgorithms()
+        {
+            try
+            {
+                var algorithms = await _dbContext.Algorithms
+                    .OrderBy(a => a.AlgorithmName)
+                    .Select(a => new AlgorithmListItemDto
+                    {
+                        AlgoId = a.AlgoId,
+                        AlgorithmName = a.AlgorithmName
+                    })
+                    .ToListAsync();
+
+                await LogSuccess($"[GetAllAlgorithms] Найдено {algorithms.Count} алгоритмов");
+                return Ok(algorithms);
+            }
+            catch (Exception ex)
+            {
+                await LogError($"[GetAllAlgorithms] Ошибка: {ex.Message}\nStackTrace: {ex.StackTrace}\n");
+                return StatusCode(500, $"Server error: {ex.Message}");
+            }
+        }
+
+        // Информация об алгоритме по Id 
+        [HttpGet("{algoId}/info")]
+        public async Task<IActionResult> GetAlgorithmInfo(int algoId)
+        {
+            try
+            {
+                var algorithm = await _dbContext.Algorithms
+                    .FirstOrDefaultAsync(a => a.AlgoId == algoId);
+
+                if (algorithm == null)
+                {
+                    await LogError($"[GetAlgorithmInfo] Алгоритм с ID {algoId} не найден.");
+                    return NotFound($"Алгоритм с ID {algoId} не найден.");
+                }
+
+                await LogSuccess($"[GetAlgorithmInfo] Успешно получена информация для AlgoId {algoId}.");
+                return Ok(algorithm);
+            }
+            catch (Exception ex)
+            {
+                await LogError($"[GetAlgorithmInfo] Ошибка для AlgoId {algoId}: {ex.Message}\nStackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpPost("execute-temporary")]
+        public async Task<IActionResult> ExecuteTemporaryCode([FromBody] CodeRequestDto request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Code))
+            {
+                await LogError("[ExecuteTemporary] Code is null or whitespace.");
+                // Возвращаем CodeResponseDto с ошибкой
+                return BadRequest(new CodeResponseDto { IsSuccessful = false, Error = "Код для выполнения не предоставлен." });
+            }
+            
+            // Генерируем временный ОТРИЦАТЕЛЬНЫЙ числовой ID
+            int tempCodeId = Guid.NewGuid().GetHashCode();
+            if (tempCodeId == 0) tempCodeId = -1;
+            if (tempCodeId > 0) tempCodeId = -tempCodeId;
+
+            string tempSourceFilePath = Path.Combine(StorageDirectory, $"{tempCodeId}.cs");
+
+            // Пути к файлам результатов, которые должен создать метод ExecuteCode(int codeId)
+            string tempErrorsFilePath = Path.Combine(StorageDirectory, $"{tempCodeId}errors.txt");
+            string tempWarningsFilePath = Path.Combine(StorageDirectory, $"{tempCodeId}warnings.txt");
+            string tempOutputFilePath = Path.Combine(StorageDirectory, $"{tempCodeId}output.txt");
+
+            
+            try
+            {
+                await System.IO.File.WriteAllTextAsync(tempSourceFilePath, request.Code);
+                await LogSuccess($"[ExecuteTemporary] Saved temporary code to {tempSourceFilePath}");
+
+                // Вызываем ваш существующий метод ExecuteCode(int codeId)
+                // Он должен сам обработать компиляцию, выполнение, создание файлов результатов и возврат CodeResponseDto
+                var actionResult = await ExecuteCode(tempCodeId); // ExecuteCode(int codeId) - ваш существующий метод
+
+                // Анализируем результат actionResult. Он уже должен быть IActionResult с CodeResponseDto
+                // или другим типом ошибки.
+                // Мы просто возвращаем тот же результат, который дал ExecuteCode.
+                if (actionResult is OkObjectResult okResult && okResult.Value is CodeResponseDto)
+                {
+                    await LogSuccess($"[ExecuteTemporary] ExecuteCode for tempId {tempCodeId}. Result: IsSuccessful={((CodeResponseDto)okResult.Value).IsSuccessful}");
+                }
+                else
+                {
+                    await LogError($"[ExecuteTemporary] ExecuteCode for tempId {tempCodeId} did not return OkObjectResult with CodeResponseDto. Actual: {actionResult?.GetType().Name}");
+                }
+                return actionResult; // Возвращаем результат вызова ExecuteCode как есть
+            }
+            catch (Exception ex)
+            {
+                await LogError($"[ExecuteTemporary] Exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
+                return StatusCode(500, new CodeResponseDto { IsSuccessful = false, Error = $"Внутренняя ошибка сервера при временном выполнении: {ex.Message}" });
+            }
+            finally
+            {
+                // Удаляем временные файлы
+                try
+                {
+                    if (System.IO.File.Exists(tempSourceFilePath)) System.IO.File.Delete(tempSourceFilePath);
+                    if (System.IO.File.Exists(tempErrorsFilePath)) System.IO.File.Delete(tempErrorsFilePath);
+                    if (System.IO.File.Exists(tempWarningsFilePath)) System.IO.File.Delete(tempWarningsFilePath);
+                    if (System.IO.File.Exists(tempOutputFilePath)) System.IO.File.Delete(tempOutputFilePath);
+                    await LogSuccess($"[ExecuteTemporary] Cleaned up temporary files for {tempCodeId}");
+                }
+                catch (Exception exCleanup)
+                {
+                    await LogError($"[ExecuteTemporary] Error cleaning up temporary files for {tempCodeId}: {exCleanup.Message}");
+                }
+            }
+        }
+
+        // DTO для запроса на создание алгоритма
+        public class CreateAlgorithmRequestDto
+        {
+            public string AlgorithmName { get; set; }
+            public string CodeContent { get; set; }
+            public IFormFile? ImageFile { get; set; }
+            public string AllStepsJson { get; set; } // JSON с шагами (шаг 0 и шаги > 0)
+        }
+
+        // DTO для запроса на обновление алгоритма
+        public class UpdateAlgorithmRequestDto
+        {
+            public string AlgorithmName { get; set; }
+            public string CodeContent { get; set; }
+            public IFormFile? ImageFile { get; set; }
+            public string AllStepsJson { get; set; } // JSON с шагами
+        }
+
+        [HttpPost("create_algorithm")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateAlgorithm([FromForm] CreateAlgorithmRequestDto request)
+        {
+            try
+            {
+                // Валидация входных данных
+                if (string.IsNullOrWhiteSpace(request.AlgorithmName))
+                    return BadRequest("Название алгоритма обязательно.");
+                if (string.IsNullOrWhiteSpace(request.CodeContent))
+                    return BadRequest("Код алгоритма обязателен.");
+                if (await _dbContext.Algorithms.AnyAsync(a => a.AlgorithmName == request.AlgorithmName))
+                    return BadRequest($"Алгоритм с именем '{request.AlgorithmName}' уже существует.");
+
+                // Сохранение файлов и создание записи в algorithms
+                int algoId = await SaveAlgorithmFiles(request);
+
+                // Парсинг типов переменных из кода
+                string codeFilePath = Path.Combine(StorageDirectory, $"{algoId}.cs");
+                var variableTypes = await ParseVariableTypes(codeFilePath);
+
+                // Обработка шагов и переменных
+                await ProcessAlgorithmSteps(algoId, request.AllStepsJson, variableTypes);
+
+                await LogSuccess($"Алгоритм создан: algo_id={algoId}, name={request.AlgorithmName}");
+                return Ok(new CreateAlgorithmResponseDto { AlgoId = algoId });
+            }
+            catch (Exception ex)
+            {
+                await LogError($"Ошибка создания алгоритма: {ex.Message}");
+                return StatusCode(500, $"Ошибка создания алгоритма: {ex.Message}");
+            }
+        }
+
+        [HttpPut("{algoId}/update_algorithm")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateAlgorithm(int algoId, [FromForm] UpdateAlgorithmRequestDto request)
+        {
+            try
+            {
+                var algorithm = await _dbContext.Algorithms.FirstOrDefaultAsync(a => a.AlgoId == algoId);
+                if (algorithm == null)
+                    return NotFound($"Алгоритм с ID {algoId} не найден.");
+
+                // Обновление имени, если указано
+                if (!string.IsNullOrWhiteSpace(request.AlgorithmName))
+                {
+                    if (await _dbContext.Algorithms.AnyAsync(a => a.AlgorithmName == request.AlgorithmName && a.AlgoId != algoId))
+                        return BadRequest($"Алгоритм с именем '{request.AlgorithmName}' уже существует.");
+                    algorithm.AlgorithmName = request.AlgorithmName;
+                }
+
+                // Обновление кода
+                string codeFilePath = Path.Combine(StorageDirectory, $"{algoId}.cs");
+                if (!string.IsNullOrWhiteSpace(request.CodeContent))
+                {
+                    await System.IO.File.WriteAllTextAsync(codeFilePath, request.CodeContent);
+                }
+
+                // Обновление изображения, если предоставлено
+                if (request.ImageFile != null && request.ImageFile.Length > 0)
+                {
+                    string imageFilePath = Path.Combine(StorageDirectory, $"{algoId}{Path.GetExtension(request.ImageFile.FileName).ToLower()}");
+                    using (var imageStream = new FileStream(imageFilePath, FileMode.Create, FileAccess.Write))
+                    {
+                        await request.ImageFile.CopyToAsync(imageStream);
+                    }
+                    algorithm.PicPath = imageFilePath;
+                }
+
+                // Парсинг типов переменных
+                var variableTypes = await ParseVariableTypes(codeFilePath);
+
+                // Удаление старых шагов и переменных
+                var existingSteps = _dbContext.AlgoSteps.Where(s => s.AlgoId == algoId);
+                var existingVars = _dbContext.TrackVariables.Where(v => v.AlgoId == algoId);
+                _dbContext.AlgoSteps.RemoveRange(existingSteps);
+                _dbContext.TrackVariables.RemoveRange(existingVars);
+
+                await _dbContext.SaveChangesAsync();
+                // Обработка новых шагов и переменных
+                await ProcessAlgorithmSteps(algoId, request.AllStepsJson, variableTypes);
+                
+                await LogSuccess($"Алгоритм обновлен: algo_id={algoId}");
+                return Ok("Алгоритм успешно обновлен.");
+            }
+            catch (Exception ex)
+            {
+                await LogError($"Ошибка обновления алгоритма: {ex.Message}");
+                return StatusCode(500, $"Ошибка обновления алгоритма: {ex.Message}");
+            }
+        }
+
+        private async Task<int> SaveAlgorithmFiles(CreateAlgorithmRequestDto request)
+        {
+            var algorithm = new Algorithm
+            {
+                AlgoPath = StorageDirectory,
+                PicPath = "",
+                AlgorithmName = request.AlgorithmName
+            };
+
+            _dbContext.Algorithms.Add(algorithm);
+            await _dbContext.SaveChangesAsync();
+
+            int algoId = algorithm.AlgoId;
+            string codeFilePath = Path.Combine(StorageDirectory, $"{algoId}.cs");
+            await System.IO.File.WriteAllTextAsync(codeFilePath, request.CodeContent);
+
+            if (request.ImageFile != null && request.ImageFile.Length > 0)
+            {
+                string imageFilePath = Path.Combine(StorageDirectory, $"{algoId}{Path.GetExtension(request.ImageFile.FileName).ToLower()}");
+                using (var imageStream = new FileStream(imageFilePath, FileMode.Create, FileAccess.Write))
+                {
+                    await request.ImageFile.CopyToAsync(imageStream);
+                }
+                algorithm.PicPath = imageFilePath;
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return algoId;
+        }
+
+        private async Task ProcessAlgorithmSteps(int algoId, string allStepsJson, Dictionary<string, string> variableTypes)
+        {
+            if (string.IsNullOrWhiteSpace(allStepsJson)) return;
+
+            var allSteps = JsonSerializer.Deserialize<List<AlgorithmStepDetailDto>>(allStepsJson);
+            if (allSteps == null || !allSteps.Any()) return;
+
+            var stepsGrouped = allSteps.GroupBy(s => s.StepNumber);
+
+            foreach (var group in stepsGrouped)
+            {
+                int stepNumber = group.Key;
+                if (stepNumber == 0)
+                {
+                    // Шаг 0: входные переменные
+                    var inputVariables = group.ToList();
+                    string step0Description = ConcatenateInputDescriptions(inputVariables);
+                    var algoStep = new AlgoStep
+                    {
+                        AlgoId = algoId,
+                        Step = 0,
+                        Description = step0Description,
+                        Difficult = 0.5f
+                    };
+                    _dbContext.AlgoSteps.Add(algoStep);
+
+                    foreach (var inputVar in inputVariables)
+                    {
+                        string varName = inputVar.Variables.FirstOrDefault();
+                        if (varName != null && variableTypes.TryGetValue(varName, out string varType))
+                        {
+                            var trackVariable = new TrackVariable
+                            {
+                                AlgoId = algoId,
+                                LineNumber = inputVar.LineNumber,
+                                VarType = varType,
+                                VarName = varName,
+                                Step = 0
+                            };
+                            _dbContext.TrackVariables.Add(trackVariable);
+                        }
+                    }
+                }
+                else
+                {
+                    // Шаги > 0: отслеживание
+                    var stepDetails = group.First(); // Предполагаем одно описание на шаг
+                    var algoStep = new AlgoStep
+                    {
+                        AlgoId = algoId,
+                        Step = stepNumber,
+                        Description = stepDetails.Description,
+                        Difficult = 0.5f
+                    };
+                    _dbContext.AlgoSteps.Add(algoStep);
+
+                    foreach (var varName in stepDetails.Variables)
+                    {
+                        if (variableTypes.TryGetValue(varName, out string varType))
+                        {
+                            var trackVariable = new TrackVariable
+                            {
+                                AlgoId = algoId,
+                                LineNumber = stepDetails.LineNumber,
+                                VarType = varType,
+                                VarName = varName,
+                                Step = stepNumber
+                            };
+                            _dbContext.TrackVariables.Add(trackVariable);
+                        }
+                    }
+                }
+            }
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        private string ConcatenateInputDescriptions(List<AlgorithmStepDetailDto> inputVariables)
+        {
+            var descriptions = inputVariables.Select(iv => $"{iv.Variables.FirstOrDefault()}:{iv.Description}");
+            return string.Join(";", descriptions);
+        }
+
+        private async Task<Dictionary<string, string>> ParseVariableTypes(string codeFilePath)
+        {
+            string code = await System.IO.File.ReadAllTextAsync(codeFilePath);
+            var syntaxTree = CSharpSyntaxTree.ParseText(code);
+            var root = syntaxTree.GetRoot();
+
+            var variableTypes = new Dictionary<string, string>();
+
+            var variableDeclarations = root.DescendantNodes().OfType<VariableDeclaratorSyntax>();
+            foreach (var varDecl in variableDeclarations)
+            {
+                var typeSyntax = varDecl.Ancestors().OfType<VariableDeclarationSyntax>().FirstOrDefault()?.Type;
+                if (typeSyntax != null)
+                {
+                    string typeName = typeSyntax.ToString();
+                    string varName = varDecl.Identifier.Text;
+                    variableTypes[varName] = typeName;
+                }
+            }
+
+            return variableTypes;
+        }
+
+        [HttpGet("{algoId}/editor_bundle")]
+        public async Task<IActionResult> GetAlgorithmEditorBundle(int algoId)
+        {
+            try
+            {
+                var algorithm = await _dbContext.Algorithms.AsNoTracking().FirstOrDefaultAsync(a => a.AlgoId == algoId);
+                if (algorithm == null) return NotFound($"Алгоритм ID {algoId} не найден.");
+
+                string codeContent = "";
+                string codeFilePath = Path.Combine(StorageDirectory, $"{algoId}.cs");
+                if (System.IO.File.Exists(codeFilePath))
+                    codeContent = await System.IO.File.ReadAllTextAsync(codeFilePath);
+
+                var allStepsFromDb = await _dbContext.AlgoSteps
+                    .Where(s => s.AlgoId == algoId)
+                    .OrderBy(s => s.Step)
+                    .ToListAsync();
+
+                var allTrackVarsFromDb = await _dbContext.TrackVariables
+                    .Where(tv => tv.AlgoId == algoId)
+                    .OrderBy(tv => tv.Step).ThenBy(tv => tv.Sequence)
+                    .ToListAsync();
+
+                var responseSteps = new List<AlgorithmStepDetailDto>();
+
+                // Шаг 0: входные переменные
+                var step0DbVars = allTrackVarsFromDb.Where(tv => tv.Step == 0).ToList();
+                var step0DbInfo = allStepsFromDb.FirstOrDefault(s => s.Step == 0);
+                var step0VarDescriptions = ParseDescriptionsFromStepString(step0DbInfo?.Description);
+
+                foreach (var dbVar in step0DbVars)
+                {
+                    responseSteps.Add(new AlgorithmStepDetailDto
+                    {
+                        StepNumber = 0,
+                        Description = step0VarDescriptions.TryGetValue(dbVar.VarName, out var desc) ? desc : "",
+                        LineNumber = dbVar.LineNumber,
+                        Variables = new List<string> { dbVar.VarName },
+                        VarType = dbVar.VarType
+                    });
+                }
+
+                // Шаги > 0: отслеживание
+                var trackingStepsDb = allStepsFromDb.Where(s => s.Step > 0).ToList();
+                foreach (var dbStep in trackingStepsDb)
+                {
+                    responseSteps.Add(new AlgorithmStepDetailDto
+                    {
+                        StepNumber = dbStep.Step,
+                        Description = dbStep.Description ?? "",
+                        LineNumber = allTrackVarsFromDb.FirstOrDefault(tv => tv.Step == dbStep.Step)?.LineNumber ?? 0,
+                        Variables = allTrackVarsFromDb.Where(tv => tv.Step == dbStep.Step).Select(tv => tv.VarName).ToList()
+                    });
+                }
+
+                var bundle = new AlgorithmEditorBundleDto
+                {
+                    AlgoId = algorithm.AlgoId,
+                    AlgorithmName = algorithm.AlgorithmName ?? "",
+                    PicPath = algorithm.PicPath,
+                    CodeContent = codeContent,
+                    AllConfiguredSteps = responseSteps.OrderBy(s => s.StepNumber).ThenBy(s => s.LineNumber).ThenBy(s => s.Variables.FirstOrDefault()).ToList()
+                };
+                return Ok(bundle);
+            }
+            catch (Exception ex)
+            {
+                await LogError($"Ошибка загрузки данных алгоритма {algoId}: {ex.Message}");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        private Dictionary<string, string> ParseDescriptionsFromStepString(string? combinedDescription)
+        {
+            var map = new Dictionary<string, string>();
+            if (string.IsNullOrWhiteSpace(combinedDescription)) return map;
+            var pairs = combinedDescription.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var pair in pairs)
+            {
+                var parts = pair.Split(new[] { ':' }, 2, StringSplitOptions.TrimEntries);
+                if (parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0])) map[parts[0]] = parts[1];
+                else if (parts.Length == 1 && !string.IsNullOrWhiteSpace(parts[0])) map[parts[0]] = "";
+            }
+            return map;
+        }
+
 
         private string ModifyCode(string code, List<(int LineNumber, string[] VariableNames)> trackLines, int codeId)
         {

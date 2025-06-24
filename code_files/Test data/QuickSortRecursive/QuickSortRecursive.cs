@@ -2,7 +2,7 @@ using System;
 
 class Program
 {
-    static void Main()
+    static void Main(string []args)
     {
         int[] arr = { 7, 2, 9, 1, 6, 3 };
 

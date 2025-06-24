@@ -134,6 +134,12 @@ namespace InterpretatorService.Data
                 .Property(d => d.LineNumber)
                 .HasColumnName("line_number");
 
+            modelBuilder.Entity<InputTestData>()
+                .HasOne<Test>()
+                .WithMany()
+                .HasForeignKey(t => t.TestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // === Tests ===
             modelBuilder.Entity<Test>()
                 .ToTable("tests")

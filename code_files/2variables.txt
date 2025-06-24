@@ -1,3 +1,5 @@
-numbers - int[]
-sum - int
+arr - int[]
+i - int
+j - int
+temp - int
 args - string []

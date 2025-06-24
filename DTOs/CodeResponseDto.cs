@@ -13,6 +13,11 @@
         public string Error { get; set; } = string.Empty;
 
         /// <summary>
+        /// Ошибки, возникшие при интерпретации
+        /// </summary>
+        public string Warning { get; set; } = string.Empty;
+
+        /// <summary>
         /// Время выполнения кода (в миллисекундах)
         /// </summary>
         public long ExecutionTime { get; set; }
