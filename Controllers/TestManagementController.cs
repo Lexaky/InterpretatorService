@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using InterpretatorService.DTOs;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace InterpretatorService.Controllers;
 
@@ -310,6 +311,7 @@ public class TestManagementController : ControllerBase
         public int? UnsolvedCount { get; set; }
     }
 
+
     [HttpDelete("delete-test/{testId}")]
     public async Task<IActionResult> DeleteTest(int testId)
     {
@@ -333,5 +335,96 @@ public class TestManagementController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    // DTO для запросов
+    public class CreateTestRequestDto
+    {
+        public Test Test { get; set; }
+        public List<InputTestData> InputData { get; set; }
+    }
+
+    public class UpdateTestRequestDto
+    {
+        public Test Test { get; set; }
+        public List<InputTestData> InputData { get; set; }
+    }
+
+    [HttpPost("create-test")]
+    public async Task<ActionResult<Test>> CreateTest([FromBody] CreateTestRequestDto request)
+    {
+        var test = new Test
+        {
+            AlgoId = request.Test.AlgoId,
+            Description = request.Test.Description,
+            TestName = request.Test.TestName,
+            difficult = request.Test.difficult,
+            SolvedCount = request.Test.SolvedCount,
+            UnsolvedCount = request.Test.UnsolvedCount
+        };
+
+        _context.Tests.Add(test);
+        await _context.SaveChangesAsync();
+
+        foreach (var input in request.InputData)
+        {
+            input.TestId = test.TestId;
+            _context.InputData.Add(new InputTestData
+            {
+                TestId = input.TestId,
+                VarName = input.VarName,
+                VarValue = input.VarValue,
+                VarType = input.VarType,
+                LineNumber = input.LineNumber
+            });
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new Test
+        {
+            TestId = test.TestId,
+            AlgoId = test.AlgoId,
+            Description = test.Description,
+            TestName = test.TestName,
+            difficult = test.difficult,
+            SolvedCount = test.SolvedCount,
+            UnsolvedCount = test.UnsolvedCount
+        });
+    }
+
+
+
+    [HttpPut("update-test/{testId}")]
+    public async Task<IActionResult> UpdateTest(int testId, [FromBody] UpdateTestRequestDto request)
+    {
+        var test = await _context.Tests.FindAsync(testId);
+        if (test == null) return NotFound();
+
+        test.AlgoId = request.Test.AlgoId;
+        test.Description = request.Test.Description;
+        test.TestName = request.Test.TestName;
+        test.difficult = request.Test.difficult;
+        test.SolvedCount = request.Test.SolvedCount;
+        test.UnsolvedCount = request.Test.UnsolvedCount;
+
+        var existingInputs = _context.InputData.Where(i => i.TestId == testId);
+        _context.InputData.RemoveRange(existingInputs);
+
+        foreach (var input in request.InputData)
+        {
+            input.TestId = testId;
+            _context.InputData.Add(new InputTestData
+            {
+                TestId = input.TestId,
+                VarName = input.VarName,
+                VarValue = input.VarValue,
+                VarType = input.VarType,
+                LineNumber = input.LineNumber
+            });
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok();
+    }
+
 }
 

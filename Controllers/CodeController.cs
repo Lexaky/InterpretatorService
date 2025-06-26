@@ -1980,24 +1980,7 @@ namespace InterpretatorService.Controllers
                 }
             }
         }
-
-        // DTO для запроса на создание алгоритма
-        public class CreateAlgorithmRequestDto
-        {
-            public string AlgorithmName { get; set; }
-            public string CodeContent { get; set; }
-            public IFormFile? ImageFile { get; set; }
-            public string AllStepsJson { get; set; } // JSON с шагами (шаг 0 и шаги > 0)
-        }
-
-        // DTO для запроса на обновление алгоритма
-        public class UpdateAlgorithmRequestDto
-        {
-            public string AlgorithmName { get; set; }
-            public string CodeContent { get; set; }
-            public IFormFile? ImageFile { get; set; }
-            public string AllStepsJson { get; set; } // JSON с шагами
-        }
+                
 
         [HttpPost("create_algorithm")]
         [Consumes("multipart/form-data")]
@@ -2313,6 +2296,7 @@ namespace InterpretatorService.Controllers
             }
             return map;
         }
+
 
 
         private string ModifyCode(string code, List<(int LineNumber, string[] VariableNames)> trackLines, int codeId)
