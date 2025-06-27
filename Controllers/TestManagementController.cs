@@ -11,6 +11,7 @@ using System.Text.Json;
 using InterpretatorService.DTOs;
 using Microsoft.AspNetCore.Components.Forms;
 
+
 namespace InterpretatorService.Controllers;
 
 [ApiController]
@@ -68,6 +69,7 @@ public class TestManagementController : ControllerBase
         }
     }
 
+
     [HttpPut("modify-test/{testId}")]
     public async Task<IActionResult> ModifyTest(int testId, [FromBody] UpdateTestDto update)
     {
@@ -110,10 +112,9 @@ public class TestManagementController : ControllerBase
         {
             var algoSteps = await _context.AlgoSteps
                 .Where(a => a.AlgoId == algoId)
-                .GroupBy(a => a.Step)
-                .Select(g => g.OrderByDescending(a => a.AlgoId).First())
                 .ToListAsync();
             _logger.LogInformation($"Fetched {algoSteps.Count} algo steps for algoId={algoId}");
+            _logger.LogDebug($"Algo steps: {JsonSerializer.Serialize(algoSteps)}");
             return Ok(algoSteps);
         }
         catch (Exception ex)
@@ -128,7 +129,13 @@ public class TestManagementController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"Received modify-algo-step request: algoId={algoId}, step={step}, update={JsonSerializer.Serialize(update)}");
+            if (update.AlgoId != algoId || update.Step != step)
+            {
+                _logger.LogWarning($"Mismatch in modify-algo-step request: URL algoId={algoId}, step={step}, body algoId={update.AlgoId}, step={update.Step}");
+                return BadRequest("Mismatch between URL and body parameters.");
+            }
+
+            _logger.LogInformation($"Received modify-algo-step request: algoId={algoId}, step={step}, difficult={update.Difficult}");
             var algoStep = await _context.AlgoSteps
                 .FirstOrDefaultAsync(a => a.AlgoId == algoId && a.Step == step);
             if (algoStep == null)
@@ -140,21 +147,22 @@ public class TestManagementController : ControllerBase
                     Difficult = update.Difficult
                 };
                 _context.AlgoSteps.Add(algoStep);
-                _logger.LogInformation($"Created new algo step: algoId={algoId}, step={step}");
+                _logger.LogInformation($"Created new algo step: algoId={algoId}, step={step}, difficult={update.Difficult}");
             }
             else
             {
                 algoStep.Difficult = update.Difficult;
                 _context.AlgoSteps.Update(algoStep);
-                _logger.LogInformation($"Updated algo step: algoId={algoId}, step={step}, difficult={algoStep.Difficult}");
+                _logger.LogInformation($"Updated algo step: algoId={algoId}, step={step}, difficult={update.Difficult}");
             }
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Successfully saved algo step: algoId={algoId}, step={step}, difficult={update.Difficult}");
             return Ok();
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error updating algo step for algoId={algoId}, step={step}: {ex.Message}");
+            _logger.LogError($"Error updating algo step for algoId={algoId}, step={step}: {ex.Message}\nStackTrace: {ex.StackTrace}");
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
@@ -231,6 +239,7 @@ public class TestManagementController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
 
     [HttpGet("fetch-test-details/{testId}")]
     public async Task<IActionResult> FetchTestDetails(int testId)
@@ -336,12 +345,7 @@ public class TestManagementController : ControllerBase
         }
     }
 
-    // DTO для запросов
-    public class CreateTestRequestDto
-    {
-        public Test Test { get; set; }
-        public List<InputTestData> InputData { get; set; }
-    }
+    
 
     public class UpdateTestRequestDto
     {
