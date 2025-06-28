@@ -1031,6 +1031,47 @@ namespace InterpretatorService.Controllers
                 // Начинаем транзакцию для операций с базой данных
                 await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
+                // Сохраняем временный тестовый файл для проверки на выполнение
+                var tryExecuteFilePath = Path.Combine(StorageDirectory, $"test{codeId}_-1.cs");
+                await System.IO.File.WriteAllTextAsync(tryExecuteFilePath, string.Join("\n", newLines));
+
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(15));
+                var executionTask = _interpreterService.ExecuteCodeAsync(tryExecuteFilePath);
+                var completedTask = await Task.WhenAny(executionTask, timeoutTask);
+
+                var filesToDelete = new List<string>
+{
+    Path.Combine(StorageDirectory, $"test{codeId}_-1.cs"),
+    Path.Combine(StorageDirectory, $"test{codeId}_-1errors.txt"),
+    Path.Combine(StorageDirectory, $"test{codeId}_-1output.txt"),
+    Path.Combine(StorageDirectory, $"test{codeId}_-1warnings.txt"),
+};
+
+                if (completedTask == timeoutTask)
+                {
+                    foreach (var file in filesToDelete)
+                    {
+                        if (System.IO.File.Exists(file))
+                        {
+                            System.IO.File.Delete(file);
+                        }
+                    }
+                    return BadRequest("Ошибка выполнения тестового задания (Timeout)");
+                }
+                var codeModel = await executionTask;
+
+                if (!codeModel.IsSuccessful)
+                {
+                    foreach (var file in filesToDelete)
+                    {
+                        if (System.IO.File.Exists(file))
+                        {
+                            System.IO.File.Delete(file);
+                        }
+                    }
+                    return BadRequest($"Ошибка выполнения тестового задания: {codeModel.ErrorOutput}.");
+                }
+
                 try
                 {
                     // Создаём запись в таблице tests
