@@ -1055,13 +1055,13 @@ namespace InterpretatorService.Controllers
                     {
                         if (!typeMap.TryGetValue(update.VariableName, out var typeInfo))
                             continue; // Пропускаем, если переменная не найдена (уже проверено выше)
-
+                        string type = typeInfo.Type + string.Concat(Enumerable.Repeat("[]", typeInfo.Rank));
                         var inputData = new InputTestData
                         {
                             TestId = testId,
                             VarName = update.VariableName,
                             VarValue = update.Value,
-                            VarType = typeInfo.Type,
+                            VarType = type,
                             LineNumber = update.LineNumber
                         };
 
@@ -1461,7 +1461,7 @@ namespace InterpretatorService.Controllers
 
                 // Читаем трекеры из таблицы TrackedVariables
                 var trackers = await _dbContext.TrackVariables
-                    .Where(t => t.AlgoId == codeId)
+                    .Where(t => t.AlgoId == codeId && t.Step > 0)
                     .GroupBy(t => t.LineNumber)
                     .Select(g => new
                     {
@@ -1922,7 +1922,7 @@ namespace InterpretatorService.Controllers
                 // Возвращаем CodeResponseDto с ошибкой
                 return BadRequest(new CodeResponseDto { IsSuccessful = false, Error = "Код для выполнения не предоставлен." });
             }
-            
+
             // Генерируем временный ОТРИЦАТЕЛЬНЫЙ числовой ID
             int tempCodeId = Guid.NewGuid().GetHashCode();
             if (tempCodeId == 0) tempCodeId = -1;
@@ -1935,7 +1935,7 @@ namespace InterpretatorService.Controllers
             string tempWarningsFilePath = Path.Combine(StorageDirectory, $"{tempCodeId}warnings.txt");
             string tempOutputFilePath = Path.Combine(StorageDirectory, $"{tempCodeId}output.txt");
 
-            
+
             try
             {
                 await System.IO.File.WriteAllTextAsync(tempSourceFilePath, request.Code);
@@ -1980,7 +1980,7 @@ namespace InterpretatorService.Controllers
                 }
             }
         }
-                
+
 
         [HttpPost("create_algorithm")]
         [Consumes("multipart/form-data")]
@@ -2064,7 +2064,7 @@ namespace InterpretatorService.Controllers
                 await _dbContext.SaveChangesAsync();
                 // Обработка новых шагов и переменных
                 await ProcessAlgorithmSteps(algoId, request.AllStepsJson, variableTypes);
-                
+
                 await LogSuccess($"Алгоритм обновлен: algo_id={algoId}");
                 return Ok("Алгоритм успешно обновлен.");
             }

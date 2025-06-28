@@ -11,7 +11,6 @@ using System.Text.Json;
 using InterpretatorService.DTOs;
 using Microsoft.AspNetCore.Components.Forms;
 
-
 namespace InterpretatorService.Controllers;
 
 [ApiController]
@@ -20,6 +19,7 @@ public class TestManagementController : ControllerBase
 {
     private readonly TestsDbContext _context;
     private readonly ILogger<TestManagementController> _logger;
+    private const string StorageDirectory = "/app/code_files";
 
     public TestManagementController(TestsDbContext context, ILogger<TestManagementController> logger)
     {
@@ -69,7 +69,6 @@ public class TestManagementController : ControllerBase
         }
     }
 
-
     [HttpPut("modify-test/{testId}")]
     public async Task<IActionResult> ModifyTest(int testId, [FromBody] UpdateTestDto update)
     {
@@ -112,9 +111,10 @@ public class TestManagementController : ControllerBase
         {
             var algoSteps = await _context.AlgoSteps
                 .Where(a => a.AlgoId == algoId)
+                .GroupBy(a => a.Step)
+                .Select(g => g.OrderByDescending(a => a.AlgoId).First())
                 .ToListAsync();
             _logger.LogInformation($"Fetched {algoSteps.Count} algo steps for algoId={algoId}");
-            _logger.LogDebug($"Algo steps: {JsonSerializer.Serialize(algoSteps)}");
             return Ok(algoSteps);
         }
         catch (Exception ex)
@@ -129,13 +129,7 @@ public class TestManagementController : ControllerBase
     {
         try
         {
-            if (update.AlgoId != algoId || update.Step != step)
-            {
-                _logger.LogWarning($"Mismatch in modify-algo-step request: URL algoId={algoId}, step={step}, body algoId={update.AlgoId}, step={update.Step}");
-                return BadRequest("Mismatch between URL and body parameters.");
-            }
-
-            _logger.LogInformation($"Received modify-algo-step request: algoId={algoId}, step={step}, difficult={update.Difficult}");
+            _logger.LogInformation($"Received modify-algo-step request: algoId={algoId}, step={step}, update={JsonSerializer.Serialize(update)}");
             var algoStep = await _context.AlgoSteps
                 .FirstOrDefaultAsync(a => a.AlgoId == algoId && a.Step == step);
             if (algoStep == null)
@@ -147,22 +141,21 @@ public class TestManagementController : ControllerBase
                     Difficult = update.Difficult
                 };
                 _context.AlgoSteps.Add(algoStep);
-                _logger.LogInformation($"Created new algo step: algoId={algoId}, step={step}, difficult={update.Difficult}");
+                _logger.LogInformation($"Created new algo step: algoId={algoId}, step={step}");
             }
             else
             {
                 algoStep.Difficult = update.Difficult;
                 _context.AlgoSteps.Update(algoStep);
-                _logger.LogInformation($"Updated algo step: algoId={algoId}, step={step}, difficult={update.Difficult}");
+                _logger.LogInformation($"Updated algo step: algoId={algoId}, step={step}, difficult={algoStep.Difficult}");
             }
 
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"Successfully saved algo step: algoId={algoId}, step={step}, difficult={update.Difficult}");
             return Ok();
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error updating algo step for algoId={algoId}, step={step}: {ex.Message}\nStackTrace: {ex.StackTrace}");
+            _logger.LogError($"Error updating algo step for algoId={algoId}, step={step}: {ex.Message}");
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
@@ -239,7 +232,6 @@ public class TestManagementController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-
 
     [HttpGet("fetch-test-details/{testId}")]
     public async Task<IActionResult> FetchTestDetails(int testId)
@@ -333,6 +325,33 @@ public class TestManagementController : ControllerBase
                 return NotFound($"Test not found: testId={testId}");
             }
 
+            int algoId = test.AlgoId;
+            string codeId = algoId.ToString();
+            string testIdStr = testId.ToString();
+
+            // Список файлов для удаления
+            var filesToDelete = new List<string>
+            {
+                Path.Combine(StorageDirectory, $"test{codeId}_{testIdStr}.cs"),
+                Path.Combine(StorageDirectory, $"test{codeId}_{testIdStr}errors.txt"),
+                Path.Combine(StorageDirectory, $"test{codeId}_{testIdStr}modified.cs"),
+                Path.Combine(StorageDirectory, $"test{codeId}_{testIdStr}output.txt"),
+                Path.Combine(StorageDirectory, $"test{codeId}_{testIdStr}warnings.txt"),
+                Path.Combine(StorageDirectory, $"{codeId}_{testIdStr}_errors.txt"),
+                Path.Combine(StorageDirectory, $"{codeId}_{testIdStr}_output.txt"),
+                Path.Combine(StorageDirectory, $"{codeId}_{testIdStr}_warnings.txt")
+            };
+
+            // Удаляем файлы, если они существуют
+            foreach (var file in filesToDelete)
+            {
+                if (System.IO.File.Exists(file))
+                {
+                    System.IO.File.Delete(file);
+                    _logger.LogInformation($"Deleted file: {file}");
+                }
+            }
+
             _context.Tests.Remove(test);
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Deleted test: testId={testId}");
@@ -345,7 +364,12 @@ public class TestManagementController : ControllerBase
         }
     }
 
-    
+    // DTO для запросов
+    public class CreateTestRequestDto
+    {
+        public Test Test { get; set; }
+        public List<InputTestData> InputData { get; set; }
+    }
 
     public class UpdateTestRequestDto
     {
@@ -353,48 +377,33 @@ public class TestManagementController : ControllerBase
         public List<InputTestData> InputData { get; set; }
     }
 
-    [HttpPost("create-test")]
-    public async Task<ActionResult<Test>> CreateTest([FromBody] CreateTestRequestDto request)
+    [HttpPut("create-helper/{testId}")]
+    public async Task<IActionResult> CreateHelper(int testId, [FromBody] Test test)
     {
-        var test = new Test
+        try
         {
-            AlgoId = request.Test.AlgoId,
-            Description = request.Test.Description,
-            TestName = request.Test.TestName,
-            difficult = request.Test.difficult,
-            SolvedCount = request.Test.SolvedCount,
-            UnsolvedCount = request.Test.UnsolvedCount
-        };
-
-        _context.Tests.Add(test);
-        await _context.SaveChangesAsync();
-
-        foreach (var input in request.InputData)
-        {
-            input.TestId = test.TestId;
-            _context.InputData.Add(new InputTestData
+            var existingTest = await _context.Tests.FirstOrDefaultAsync(t => t.TestId == testId);
+            if (existingTest == null)
             {
-                TestId = input.TestId,
-                VarName = input.VarName,
-                VarValue = input.VarValue,
-                VarType = input.VarType,
-                LineNumber = input.LineNumber
-            });
+                _logger.LogWarning($"Test not found: testId={testId}");
+                return NotFound($"Test not found: testId={testId}");
+            }
+
+            existingTest.TestName = test.TestName;
+            existingTest.Description = test.Description;
+
+            _context.Tests.Update(existingTest);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"Updated test with name and description: testId={testId}, name={test.TestName}");
+            return Ok(new { TestId = testId });
         }
-
-        await _context.SaveChangesAsync();
-        return Ok(new Test
+        catch (Exception ex)
         {
-            TestId = test.TestId,
-            AlgoId = test.AlgoId,
-            Description = test.Description,
-            TestName = test.TestName,
-            difficult = test.difficult,
-            SolvedCount = test.SolvedCount,
-            UnsolvedCount = test.UnsolvedCount
-        });
+            _logger.LogError($"Error updating test {testId}: {ex.Message}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
-
 
 
     [HttpPut("update-test/{testId}")]

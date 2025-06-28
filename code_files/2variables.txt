@@ -1,5 +1,0 @@
-arr - int[]
-i - int
-j - int
-temp - int
-args - string []
