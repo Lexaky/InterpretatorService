@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using InterpretatorService.DTOs;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.Options;
 
 namespace InterpretatorService.Controllers;
 
@@ -129,6 +130,12 @@ public class TestManagementController : ControllerBase
     {
         try
         {
+            if (update.AlgoId != algoId || update.Step != step)
+            {
+                _logger.LogWarning($"Mismatch in modify-algo-step request: URL algoId={algoId}, step={step}, body algoId={update.AlgoId}, step={update.Step}");
+                return BadRequest("Mismatch between URL and body parameters.");
+            }
+
             _logger.LogInformation($"Received modify-algo-step request: algoId={algoId}, step={step}, update={JsonSerializer.Serialize(update)}");
             var algoStep = await _context.AlgoSteps
                 .FirstOrDefaultAsync(a => a.AlgoId == algoId && a.Step == step);
